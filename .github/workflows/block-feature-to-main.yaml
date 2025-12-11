@@ -1,0 +1,20 @@
+name: Block feature branches from merging to main
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  prevent-feature-to-main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if PR comes from feature/* branch
+        run: |
+          echo "Base ref: ${{ github.base_ref }}"
+          echo "Head ref: ${{ github.head_ref }}"
+          if [[ "${{ github.head_ref }}" == feature/* ]]; then
+            echo "❌ Direct merges from feature/* to main are not allowed. Merge into dev first."
+            exit 1
+          else
+            echo "✅ Source branch is allowed."
+          fi
