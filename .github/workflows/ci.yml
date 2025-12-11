@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main", "dev", "feature/**" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+jobs:
+  build-test-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest flake8
+
+      - name: Lint with flake8
+        run: |
+          flake8 app --max-line-length=100 || true
+
+      - name: Run tests
+        run: |
+          if [ -d app/tests ]; then pytest app/tests -q; else echo "No tests yet"; fi
+
+      - name: Build Docker image
+        run: |
+          docker build -t prra-app:ci-test .
+
+      - name: Install Helm
+        run: |
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: Lint Helm chart
+        run: |
+          if [ -d charts/prra ]; then helm lint charts/prra; else echo "No Helm chart yet"; fi
