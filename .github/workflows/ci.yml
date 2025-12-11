@@ -14,6 +14,19 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Block feature branches from merging directly into main
+        if: github.event_name == 'pull_request' && github.base_ref == 'main'
+        run: |
+          echo "Base ref: ${{ github.base_ref }}"
+          echo "Head ref: ${{ github.head_ref }}"
+          if [[ "${{ github.head_ref }}" == feature/* ]]; then
+            echo "❌ Direct merges from feature/* into main are not allowed. Merge into dev first."
+            exit 1
+          else
+            echo "✅ Source branch is allowed to target main."
+          fi
+
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
