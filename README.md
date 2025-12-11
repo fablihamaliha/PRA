@@ -4,3 +4,4 @@ Currently the following has been set :
 3. Tag rules 
 4. Branch rules on main so as to anything from feature 
 cannot be merged to main. Only dev -> main
+5. CI pipeline 
