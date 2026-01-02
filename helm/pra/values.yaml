@@ -1,0 +1,144 @@
+# Default values for PRA application
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/fablihamaliha/pra
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 5001
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: pra.example.com  # Change this to your domain
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: pra-tls
+      hosts:
+        - pra.example.com  # Change this to your domain
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Application Configuration
+app:
+  flaskEnv: production
+  flaskDebug: false
+  logLevel: INFO
+  maxRecommendations: 3
+  minProductRating: 3.5
+
+# Database Configuration
+database:
+  # External PostgreSQL (recommended for production)
+  external: true
+  host: "postgresql.default.svc.cluster.local"  # Change to your DB host
+  port: 5432
+  name: prra_db
+  user: prra_user
+
+  # Or deploy PostgreSQL in cluster (for testing)
+  deploy: false
+  storage: 10Gi
+  storageClass: standard
+
+# Secrets (NEVER commit actual values!)
+# Set these via Helm install/upgrade or external secret management
+secrets:
+  # Generate a random secret key: openssl rand -hex 32
+  secretKey: ""  # Set via: --set secrets.secretKey=your-secret
+
+  # Database password
+  dbPassword: ""  # Set via: --set secrets.dbPassword=your-password
+
+  # API Keys (optional)
+  rapidapiKey: ""  # Set via: --set secrets.rapidapiKey=your-key
+  openaiApiKey: ""  # Set via: --set secrets.openaiApiKey=your-key
+
+# Persistence for logs
+persistence:
+  enabled: true
+  storageClass: "standard"
+  accessMode: ReadWriteOnce
+  size: 5Gi
+  mountPath: /app/logs
+
+# Health checks
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: 5001
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: 5001
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
