@@ -1,8 +1,8 @@
 from flask import Flask, send_from_directory, jsonify, render_template, request, session
 from flask_cors import CORS
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from config import Config
-from models.db import db
+from pra.config import Config
+from pra.models.db import db
 import logging
 import traceback
 from dotenv import load_dotenv
@@ -46,12 +46,12 @@ def create_app(config_class=Config):
 
     @login_manager.user_loader
     def load_user(user_id):
-        from models.user import User
+        from pra.models.user import User
         return User.query.get(int(user_id))
 
     # Import blueprints here to avoid circular imports
-    from blueprints.skincare import skincare_bp
-    from blueprints.deals import deals_bp
+    from pra.blueprints.skincare import skincare_bp
+    from pra.blueprints.deals import deals_bp
 
     # Register blueprints
     app.register_blueprint(skincare_bp, url_prefix='/skincare')
@@ -61,12 +61,12 @@ def create_app(config_class=Config):
     with app.app_context():
         try:
             # Import models here to ensure they're registered
-            from models import user, skin_profile, product, recommendation
+            from pra.models import user, skin_profile, product, recommendation
             db.create_all()
             logger.info("Database tables created successfully")
 
             # Create a test user if it doesn't exist
-            from models.user import User
+            from pra.models.user import User
             test_user = User.query.filter_by(email="test@example.com").first()
             if not test_user:
                 test_user = User(email="test@example.com", name="Test User")
