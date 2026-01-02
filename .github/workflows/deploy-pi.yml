@@ -1,24 +1,26 @@
 name: Deploy to Raspberry Pi
 
 on:
-  workflow_run:
-    workflows: ["CI - Build & Test"]
-    types:
-      - completed
+  push:
+    branches:
+      - master
   workflow_dispatch:  # Allow manual triggers
 
 jobs:
   deploy:
     runs-on: self-hosted
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.head_branch == 'master')
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Wait for CI to complete
+        uses: lewagon/wait-on-check-action@v1.3.4
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Build & Push Docker Image'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 10
 
       - name: Login to GitHub Container Registry
         run: |
