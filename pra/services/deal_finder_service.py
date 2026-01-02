@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import os
 # Removed unused imports: ThreadPoolExecutor, as_completed, json
 
-from services.gpt_service import GPTService
+from pra.services.gpt_service import GPTService
 
 logger = logging.getLogger(__name__)
 

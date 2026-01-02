@@ -1,4 +1,4 @@
-from models.db import db
+from pra.models.db import db
 from datetime import datetime
 import json
 
