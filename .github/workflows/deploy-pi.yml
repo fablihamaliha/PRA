@@ -46,8 +46,8 @@ jobs:
           docker run -d \
             --name pra-app \
             --restart unless-stopped \
-            -p 5001:5001 \
-            -e DATABASE_URL="postgresql://prra_user:prra_password_123@192.168.1.68:5432/prra_db" \
+            --network host \
+            -e DATABASE_URL="postgresql://prra_user:prra_password_123@localhost:5432/prra_db" \
             -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
             -e RAPIDAPI_KEY="${{ secrets.RAPIDAPI_KEY }}" \
             -e OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
