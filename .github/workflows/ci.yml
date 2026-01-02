@@ -60,7 +60,7 @@ jobs:
           # pytest tests/ -v
 
           # For now, just check imports work
-          python -c "from pra.app import app; print('✅ App imports successfully')"
+          python -c "from pra.app import create_app; app = create_app(); print('✅ App imports and creates successfully')"
 
       - name: Check code quality
         run: |
