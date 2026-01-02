@@ -6,8 +6,8 @@ SECRET_KEY=change-this-in-production-use-strong-random-string
 LOG_LEVEL=INFO
 
 # Database - SQLite for local development (no installation needed)
-DATABASE_URL=sqlite:///prra.db
-SQLALCHEMY_ECHO=True
+DATABASE_URL=postgresql://prra_user:prra_password_123@localhost:5432/prra_db
+
 
 # Redis (optional - comment out if not using)
 # REDIS_URL=redis://localhost:6379/0

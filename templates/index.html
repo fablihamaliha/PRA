@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Find the best deals and get personalized skincare recommendations">
+    <title>PRA - Find Deals & Get Personalized Recommendations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1 class="brand-title">PRA</h1>
+                <p class="brand-subtitle">Deals & Recommendations</p>
+            </div>
+            <div class="nav-actions">
+                <div id="userSection" class="user-section hidden">
+                    <span class="user-greeting">Hi, <span id="userName"></span>!</span>
+                    <button class="btn btn-small" id="myProfileBtn">My Profile</button>
+                    <button class="btn btn-small btn-outline" id="logoutBtn">Logout</button>
+                </div>
+                <div id="guestSection" class="guest-section">
+                    <button class="btn btn-small" id="loginBtn">Login</button>
+                    <button class="btn btn-small btn-primary" id="signupBtn">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <div class="hero-badge">✨ Smart Shopping Made Simple</div>
+            <h1 class="hero-title">Find the Best Deals & Get Personalized Recommendations</h1>
+            <p class="hero-subtitle">Compare prices from top retailers and discover skincare products perfect for your unique skin type</p>
+
+            <!-- Search Form -->
+            <form class="search-form" id="searchForm" role="search">
+                <div class="search-container">
+                    <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="productSearch" class="search-input"
+                           placeholder="Search for products (e.g., moisturizer, iPhone, Nike shoes)"
+                           autocomplete="off" required>
+                    <button type="submit" class="search-btn">Search Deals</button>
+                </div>
+                <div class="search-options">
+                    <div class="search-options-left">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="useLocation" checked>
+                            <span>Use my location for local deals</span>
+                        </label>
+                        <label class="checkbox-label hidden" id="matchProfileOption">
+                            <input type="checkbox" id="matchProfile">
+                            <span>✨ Only show products matching my skin profile</span>
+                        </label>
+                    </div>
+                    <button type="button" class="link-btn" id="getRecommendationsBtn">
+                        ✨ Get Personalized Recommendations
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            <svg class="empty-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="9" cy="9" r="7"></circle>
+                <path d="m16 16 5 5"></path>
+            </svg>
+            <h2 class="empty-title">Start Your Search</h2>
+            <p class="empty-description">Search for products to find the best deals, or get personalized recommendations based on your preferences.</p>
+            <div class="cta-cards">
+                <div class="cta-card">
+                    <h3>🔍 Search for Deals</h3>
+                    <p>Compare prices across multiple retailers</p>
+                </div>
+                <div class="cta-card" id="recommendationsCTA">
+                    <h3>✨ Get Recommendations</h3>
+                    <p>Find products perfect for your needs</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state hidden" id="loadingState">
+            <div class="loading-spinner"></div>
+            <h2 class="loading-title">Searching for the best deals...</h2>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section hidden" id="resultsSection">
+            <div class="results-header">
+                <h2 class="results-title">Results for "<span id="searchedProduct"></span>"</h2>
+                <p class="results-count" id="resultsCount"></p>
+            </div>
+            <div class="deals-grid" id="dealsGrid"></div>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div class="recommendations-section hidden" id="recommendationsSection">
+            <div class="results-header">
+                <h2 class="results-title">Your Personalized Recommendations</h2>
+                <p class="results-subtitle">Based on your preferences</p>
+            </div>
+            <div class="recommendations-grid" id="recommendationsGrid"></div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-container">
+            <button class="modal-close" id="closeAuthModal">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title" id="authModalTitle">Welcome</h2>
+            </div>
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-tab="signin">Sign In</button>
+                <button class="tab-btn" data-tab="signup">Sign Up</button>
+            </div>
+
+            <!-- Sign In Panel -->
+            <div class="tab-panel active" id="signinPanel">
+                <form class="auth-form" id="loginForm">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Log In</button>
+                    <div class="alert hidden" id="loginAlert"></div>
+                </form>
+            </div>
+
+            <!-- Sign Up Panel -->
+            <div class="tab-panel" id="signupPanel">
+                <form class="auth-form" id="signupForm">
+                    <div class="form-group">
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" minlength="8" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                    <div class="alert hidden" id="signupAlert"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preferences Modal -->
+    <div class="modal-overlay" id="preferencesModal">
+        <div class="modal-container modal-large">
+            <button class="modal-close" id="closePreferencesModal">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title">✨ Set Your Skincare Preferences</h2>
+                <p class="modal-subtitle">Tell us about your skin so we can recommend products tailored just for you</p>
+            </div>
+            <form class="preferences-form" id="preferencesForm">
+                <div class="form-section">
+                    <h3>Skin Type</h3>
+                    <div class="radio-group">
+                        <label><input type="radio" name="skin_type" value="oily" required> Oily</label>
+                        <label><input type="radio" name="skin_type" value="dry"> Dry</label>
+                        <label><input type="radio" name="skin_type" value="combination"> Combination</label>
+                        <label><input type="radio" name="skin_type" value="normal"> Normal</label>
+                        <label><input type="radio" name="skin_type" value="sensitive"> Sensitive</label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Main Concerns (Select all that apply)</h3>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="concerns" value="acne"> Acne & Breakouts</label>
+                        <label><input type="checkbox" name="concerns" value="aging"> Anti-Aging & Fine Lines</label>
+                        <label><input type="checkbox" name="concerns" value="dark_spots"> Dark Spots & Hyperpigmentation</label>
+                        <label><input type="checkbox" name="concerns" value="dryness"> Dryness & Dehydration</label>
+                        <label><input type="checkbox" name="concerns" value="redness"> Redness & Sensitivity</label>
+                        <label><input type="checkbox" name="concerns" value="pores"> Large Pores</label>
+                        <label><input type="checkbox" name="concerns" value="dullness"> Dullness & Uneven Texture</label>
+                        <label><input type="checkbox" name="concerns" value="oil_control"> Oil Control</label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Preferred Ingredients</h3>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="preferred_ingredients" value="hyaluronic_acid"> Hyaluronic Acid</label>
+                        <label><input type="checkbox" name="preferred_ingredients" value="vitamin_c"> Vitamin C</label>
+                        <label><input type="checkbox" name="preferred_ingredients" value="retinol"> Retinol</label>
+                        <label><input type="checkbox" name="preferred_ingredients" value="niacinamide"> Niacinamide</label>
+                        <label><input type="checkbox" name="preferred_ingredients" value="salicylic_acid"> Salicylic Acid</label>
+                        <label><input type="checkbox" name="preferred_ingredients" value="glycolic_acid"> Glycolic Acid (AHA)</label>
+                        <label><input type="checkbox" name="preferred_ingredients" value="peptides"> Peptides</label>
+                        <label><input type="checkbox" name="preferred_ingredients" value="ceramides"> Ceramides</label>
+                        <label><input type="checkbox" name="preferred_ingredients" value="tea_tree"> Tea Tree Oil</label>
+                        <label><input type="checkbox" name="preferred_ingredients" value="centella"> Centella Asiatica (Cica)</label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Ingredients to Avoid</h3>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="avoided_ingredients" value="fragrance"> Fragrance</label>
+                        <label><input type="checkbox" name="avoided_ingredients" value="alcohol"> Alcohol (Denat)</label>
+                        <label><input type="checkbox" name="avoided_ingredients" value="sulfates"> Sulfates</label>
+                        <label><input type="checkbox" name="avoided_ingredients" value="parabens"> Parabens</label>
+                        <label><input type="checkbox" name="avoided_ingredients" value="silicones"> Silicones</label>
+                        <label><input type="checkbox" name="avoided_ingredients" value="essential_oils"> Essential Oils</label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Product Preferences</h3>
+                    <div class="checkbox-group">
+                        <label><input type="checkbox" name="preferences" value="cruelty_free"> Cruelty-Free</label>
+                        <label><input type="checkbox" name="preferences" value="vegan"> Vegan</label>
+                        <label><input type="checkbox" name="preferences" value="clean_beauty"> Clean Beauty</label>
+                        <label><input type="checkbox" name="preferences" value="organic"> Organic</label>
+                        <label><input type="checkbox" name="preferences" value="fragrance_free"> Fragrance-Free</label>
+                        <label><input type="checkbox" name="preferences" value="spf"> Contains SPF</label>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Budget Range</h3>
+                    <div class="budget-inputs">
+                        <div class="form-group">
+                            <label for="budget_min">Minimum ($)</label>
+                            <input type="number" id="budget_min" name="budget_min" min="0" value="10">
+                        </div>
+                        <div class="form-group">
+                            <label for="budget_max">Maximum ($)</label>
+                            <input type="number" id="budget_max" name="budget_max" min="0" value="100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-large">Get Recommendations</button>
+                </div>
+                <div class="alert hidden" id="preferencesAlert"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

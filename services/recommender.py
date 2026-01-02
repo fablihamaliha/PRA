@@ -4,6 +4,7 @@ from datetime import datetime
 
 from services.external_api import ExternalAPIService
 from services.scoring import ScoringService
+from services.gpt_service import GPTService
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,7 @@ class RecommenderService:
         self.config = Config()
         self.api_service = ExternalAPIService()
         self.scoring_service = ScoringService()
+        self.gpt_service = GPTService()
         self.max_recommendations = self.config.MAX_RECOMMENDATIONS
 
     def get_recommendations(self, profile: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -54,10 +56,21 @@ class RecommenderService:
         # Step 6: Get top N recommendations
         top_recommendations = scored_products[:self.max_recommendations]
 
-        # Step 7: Save/update products in database
+        # Step 7: Enhance with GPT (if available)
+        if self.gpt_service.is_available():
+            try:
+                top_recommendations = self.gpt_service.enhance_product_descriptions(
+                    top_recommendations,
+                    profile
+                )
+                logger.info("Enhanced recommendations with GPT insights")
+            except Exception as e:
+                logger.error(f"Error enhancing with GPT: {str(e)}")
+
+        # Step 8: Save/update products in database
         self._save_products(top_recommendations)
 
-        # Step 8: Format recommendations
+        # Step 9: Format recommendations
         formatted_recommendations = self._format_recommendations(top_recommendations)
 
         logger.info(f"Generated {len(formatted_recommendations)} recommendations")

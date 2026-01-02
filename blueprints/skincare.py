@@ -73,56 +73,7 @@ def quiz():
         return jsonify({'error': 'Internal server error'}), 500
 
 
-@skincare_bp.route('/auto-cart', methods=['POST'])
-def auto_add_to_cart():
-    """
-    Automatically login to Sephora and add recommendations to cart
-    """
-    from services.sephora_automation import SephoraCartService
-
-    try:
-        data = request.get_json()
-
-        # Required fields
-        user_id = data.get('user_id')
-        sephora_email = data.get('sephora_email')
-        sephora_password = data.get('sephora_password')
-
-        if not all([user_id, sephora_email, sephora_password]):
-            return jsonify({
-                'error': 'Missing required fields: user_id, sephora_email, sephora_password'
-            }), 400
-
-        # Get recommendations
-        from models.user import User
-        from models.skin_profile import SkinProfile
-        from services.recommender import RecommenderService
-
-        user = User.query.get(user_id)
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-
-        profile = SkinProfile.query.filter_by(user_id=user_id).first()
-        if not profile:
-            return jsonify({'error': 'Skin profile not found'}), 404
-
-        # Generate recommendations
-        recommender = RecommenderService()
-        recommendations = recommender.get_recommendations(profile.to_dict())
-
-        # Auto-add to cart
-        cart_service = SephoraCartService()
-        result = cart_service.auto_add_recommendations(
-            sephora_email,
-            sephora_password,
-            recommendations
-        )
-
-        return jsonify(result), 200
-
-    except Exception as e:
-        logger.error(f"Auto-cart error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+# Auto-cart feature removed - users will search for best prices instead
 @skincare_bp.route('/recommend', methods=['POST'])
 def recommend():
     """
