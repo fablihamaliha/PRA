@@ -14,13 +14,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Wait for CI to complete
-        uses: lewagon/wait-on-check-action@v1.3.4
-        with:
-          ref: ${{ github.sha }}
-          check-name: 'Build & Push Docker Image'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
+      - name: Wait for Docker image to be available
+        run: |
+          echo "Waiting for CI to build and push Docker image..."
+          max_attempts=60
+          attempt=0
+          while [ $attempt -lt $max_attempts ]; do
+            if docker pull ghcr.io/fablihamaliha/pra:${{ github.sha }} 2>/dev/null; then
+              echo "✅ Docker image is ready!"
+              break
+            fi
+            echo "Attempt $((attempt+1))/$max_attempts: Image not ready yet, waiting 10s..."
+            sleep 10
+            attempt=$((attempt+1))
+          done
+          if [ $attempt -eq $max_attempts ]; then
+            echo "❌ Timeout waiting for Docker image"
+            exit 1
+          fi
 
       - name: Login to GitHub Container Registry
         run: |
