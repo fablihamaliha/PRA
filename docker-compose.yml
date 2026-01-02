@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: pra-postgres
+    environment:
+      POSTGRES_DB: prra_db
+      POSTGRES_USER: prra_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prra_user -d prra_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pra-network
+
+  # PRA Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pra-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Database
+      DATABASE_URL: postgresql://prra_user:${DB_PASSWORD:-changeme}@postgres:5432/prra_db
+
+      # Flask
+      FLASK_ENV: ${FLASK_ENV:-production}
+      FLASK_DEBUG: ${FLASK_DEBUG:-False}
+      SECRET_KEY: ${SECRET_KEY:-change-this-in-production}
+
+      # API Keys (optional)
+      RAPIDAPI_KEY: ${RAPIDAPI_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+
+      # App Settings
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      MAX_RECOMMENDATIONS: ${MAX_RECOMMENDATIONS:-3}
+      MIN_PRODUCT_RATING: ${MIN_PRODUCT_RATING:-3.5}
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - pra-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  pra-network:
+    driver: bridge
