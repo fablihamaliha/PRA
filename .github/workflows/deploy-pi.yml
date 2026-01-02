@@ -14,6 +14,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Login to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Wait for Docker image to be available
         run: |
           echo "Waiting for CI to build and push Docker image..."
@@ -32,10 +36,6 @@ jobs:
             echo "❌ Timeout waiting for Docker image"
             exit 1
           fi
-
-      - name: Login to GitHub Container Registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Stop existing container
         run: |
