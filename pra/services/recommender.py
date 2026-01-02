@@ -2,10 +2,10 @@ import logging
 from typing import Dict, Any, List
 from datetime import datetime
 
-from services.external_api import ExternalAPIService
-from services.scoring import ScoringService
-from services.gpt_service import GPTService
-from config import Config
+from pra.services.external_api import ExternalAPIService
+from pra.services.scoring import ScoringService
+from pra.services.gpt_service import GPTService
+from pra.config import Config
 
 logger = logging.getLogger(__name__)
 

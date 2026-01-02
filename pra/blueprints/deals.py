@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, render_template
-from services.deal_finder_service import DealFinderService
+from pra.services.deal_finder_service import DealFinderService
 import logging
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 import requests
 import logging
 from typing import List, Dict, Any
-from config import Config
+from pra.config import Config
 
 logger = logging.getLogger(__name__)
 
