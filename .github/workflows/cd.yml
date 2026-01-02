@@ -68,37 +68,32 @@ jobs:
   deploy-to-pi:
     name: Deploy to Raspberry Pi
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, arm64]
     if: github.event_name == 'release'  # Only deploy on releases
 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.PI_HOST }}
-          username: ${{ secrets.PI_USERNAME }}
-          key: ${{ secrets.PI_SSH_KEY }}
-          script: |
-            # Pull the latest image
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+      - name: Deploy on self-hosted runner
+        run: |
+          # Pull the latest image
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-            # Stop old container
-            docker stop pra-app || true
-            docker rm pra-app || true
+          # Stop old container
+          docker stop pra-app || true
+          docker rm pra-app || true
 
-            # Run new container
-            docker run -d \
-              --name pra-app \
-              --restart unless-stopped \
-              -p 80:5001 \
-              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
-              -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
-              -e RAPIDAPI_KEY="${{ secrets.RAPIDAPI_KEY }}" \
-              -e OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
-              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          # Run new container
+          docker run -d \
+            --name pra-app \
+            --restart unless-stopped \
+            -p 80:5001 \
+            -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+            -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
+            -e RAPIDAPI_KEY="${{ secrets.RAPIDAPI_KEY }}" \
+            -e OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-            # Clean up old images
-            docker image prune -a -f
+          # Clean up old images
+          docker image prune -a -f
 
-            echo "✅ Deployed successfully!"
+          echo "✅ Deployed successfully!"
