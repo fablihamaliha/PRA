@@ -5,18 +5,20 @@ on:
     workflows: ["CI - Build & Test"]
     types:
       - completed
-    branches:
-      - master
   workflow_dispatch:  # Allow manual triggers
 
 jobs:
   deploy:
     runs-on: [self-hosted, raspberry-pi]
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master' }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Stop existing container
         run: |
