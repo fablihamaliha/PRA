@@ -14,7 +14,7 @@ load_dotenv()
 
 # Initialize Flask-Login
 login_manager = LoginManager()
-
+#testing
 
 def create_app(config_class=Config):
     app = Flask(__name__, static_folder='static')
