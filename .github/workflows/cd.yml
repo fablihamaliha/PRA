@@ -1,6 +1,6 @@
 # CD Pipeline - Continuous Deployment
 # Automatically builds and pushes Docker images on releases
-
+#automate
 name: CD - Deploy
 
 on:
