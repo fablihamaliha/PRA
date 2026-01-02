@@ -4,7 +4,7 @@ FROM python:3.12-slim
 # Prevent Python from writing .pyc files and enable unbuffered logs
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    FLASK_APP=pra
+    FLASK_APP=pra.app:create_app()
 
     
 # Set the working directory inside the container
