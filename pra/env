@@ -1,0 +1,26 @@
+
+# Application
+FLASK_APP=app.py
+FLASK_ENV=development
+SECRET_KEY=change-this-in-production-use-strong-random-string
+LOG_LEVEL=INFO
+
+# Database - SQLite for local development (no installation needed)
+DATABASE_URL=postgresql://prra_user:prra_password_123@localhost:5432/prra_db
+
+
+# Redis (optional - comment out if not using)
+# REDIS_URL=redis://localhost:6379/0
+
+# External APIs
+SEPHORA_API_KEY=your_sephora_api_key_here
+AMAZON_API_KEY=your_amazon_api_key_here
+SKINCARE_API_KEY=your_skincare_api_key_here
+
+# Recommendation Settings
+MAX_RECOMMENDATIONS=3
+MIN_PRODUCT_RATING=3.5
+
+# Rate Limiting
+API_RATE_LIMIT=100
+```
