@@ -1,0 +1,583 @@
+{% extends "base.html" %}
+
+{% block title %}Build Your Routine | Personalized Skincare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 64px;
+    }
+
+    .form-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 44px;
+        font-weight: 600;
+        color: #2C2421;
+        margin-bottom: 16px;
+        letter-spacing: -0.3px;
+    }
+
+    .form-subtitle {
+        font-size: 17px;
+        color: #6B6560;
+        line-height: 1.6;
+    }
+
+    .form-section {
+        background-color: #FFFFFF;
+        padding: 40px;
+        border-radius: 16px;
+        margin-bottom: 24px;
+        border: 1px solid #F0EDE8;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .form-section-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 24px;
+        font-weight: 600;
+        color: #2C2421;
+        margin-bottom: 24px;
+    }
+
+    .form-group {
+        margin-bottom: 28px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 15px;
+        font-weight: 500;
+        color: #3D3D3D;
+        margin-bottom: 12px;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 14px 18px;
+        font-size: 15px;
+        font-family: 'Inter', sans-serif;
+        color: #1A1A1A;
+        background-color: #F8F7F4;
+        border: 1px solid #E8E4DF;
+        border-radius: 12px;
+        outline: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .form-select:focus {
+        border-color: #C9A88F;
+        background-color: #FFFFFF;
+        box-shadow: 0 0 0 3px rgba(201, 168, 143, 0.08);
+    }
+
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        background-color: #FAF8F5;
+        border: 1.5px solid #F0EDE8;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-item:hover {
+        border-color: #C9A88F;
+        background-color: #FFFFFF;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        margin-right: 10px;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #C9A88F;
+    }
+
+    .checkbox-item input[type="checkbox"]:checked + label {
+        color: #C9A88F;
+        font-weight: 500;
+    }
+
+    .checkbox-item label {
+        font-size: 14px;
+        color: #3D3D3D;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .tag-input-container {
+        position: relative;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 14px 18px;
+        font-size: 15px;
+        font-family: 'Inter', sans-serif;
+        color: #1A1A1A;
+        background-color: #F8F7F4;
+        border: 1px solid #E8E4DF;
+        border-radius: 12px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+        border-color: #C9A88F;
+        background-color: #FFFFFF;
+        box-shadow: 0 0 0 3px rgba(201, 168, 143, 0.08);
+    }
+
+    .tags-display {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 20px;
+    }
+
+    .tag-remove {
+        cursor: pointer;
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 18px 48px;
+        font-size: 16px;
+        font-weight: 500;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 28px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(201, 168, 143, 0.3);
+        margin-top: 32px;
+    }
+
+    .submit-button:hover {
+        background: linear-gradient(135deg, #B8977D 0%, #A88869 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(201, 168, 143, 0.4);
+    }
+
+    .submit-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .loading-spinner {
+        display: none;
+        margin: 40px auto;
+        text-align: center;
+    }
+
+    .spinner {
+        border: 3px solid #F0EDE8;
+        border-top: 3px solid #C9A88F;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1 class="form-title">{% if update_mode %}Update Your Routine{% else %}Let's Find Your Perfect Routine{% endif %}</h1>
+        <p class="form-subtitle">{% if update_mode %}Modify your preferences below to update your routine{% else %}No more endless scrolling through reviews. Just answer a few simple questions and we'll do the research for you{% endif %}</p>
+    </div>
+
+    <form id="routineForm">
+        <!-- Skin Type Section -->
+        <div class="form-section">
+            <h2 class="form-section-title">Your Skin Type</h2>
+            <div class="form-group">
+                <label class="form-label" for="skinType">What's your skin type?</label>
+                <select class="form-select" id="skinType" name="skin_type" required>
+                    <option value="">Select your skin type</option>
+                    <option value="oily">Oily</option>
+                    <option value="dry">Dry</option>
+                    <option value="combination">Combination</option>
+                    <option value="normal">Normal</option>
+                    <option value="sensitive">Sensitive</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Skin Concerns Section -->
+        <div class="form-section">
+            <h2 class="form-section-title">Your Skin Concerns</h2>
+            <div class="form-group">
+                <label class="form-label">What are your main skin concerns? (Select all that apply)</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="acne" name="concerns" value="acne">
+                        <label for="acne">Acne</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="aging" name="concerns" value="aging">
+                        <label for="aging">Aging</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="hyperpigmentation" name="concerns" value="hyperpigmentation">
+                        <label for="hyperpigmentation">Hyperpigmentation</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="dryness" name="concerns" value="dryness">
+                        <label for="dryness">Dryness</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="redness" name="concerns" value="redness">
+                        <label for="redness">Redness</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="texture" name="concerns" value="texture">
+                        <label for="texture">Uneven Texture</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="pores" name="concerns" value="pores">
+                        <label for="pores">Large Pores</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="dullness" name="concerns" value="dullness">
+                        <label for="dullness">Dullness</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Section -->
+        <div class="form-section">
+            <h2 class="form-section-title">Your Budget</h2>
+            <div class="form-group">
+                <label class="form-label" for="budget">How much are you comfortable spending per product?</label>
+                <select class="form-select" id="budget" name="budget" required>
+                    <option value="">Select your budget</option>
+                    <option value="budget">Budget-friendly (Under $20)</option>
+                    <option value="mid-range">Mid-range ($20-$50)</option>
+                    <option value="luxury">Luxury ($50+)</option>
+                    <option value="mixed">I want to see all options</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Lifestyle Section -->
+        <div class="form-section">
+            <h2 class="form-section-title">Your Lifestyle</h2>
+            <div class="form-group">
+                <label class="form-label">Select all that apply to you:</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="outdoors" name="lifestyle" value="outdoors">
+                        <label for="outdoors">Spend time outdoors</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="makeup" name="lifestyle" value="makeup">
+                        <label for="makeup">Wear makeup daily</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="minimal" name="lifestyle" value="minimal">
+                        <label for="minimal">Prefer minimal steps</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="extensive" name="lifestyle" value="extensive">
+                        <label for="extensive">Love multi-step routines</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="gym" name="lifestyle" value="gym">
+                        <label for="gym">Work out regularly</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="travel" name="lifestyle" value="travel">
+                        <label for="travel">Travel frequently</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ingredients Section -->
+        <div class="form-section">
+            <h2 class="form-section-title">Ingredient Preferences</h2>
+
+            <div class="form-group">
+                <label class="form-label" for="preferredIngredients">Ingredients you prefer (optional)</label>
+                <input
+                    type="text"
+                    class="form-input"
+                    id="preferredIngredients"
+                    placeholder="e.g., hyaluronic acid, niacinamide, vitamin C (press Enter to add)"
+                >
+                <div class="tags-display" id="preferredTags"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="avoidedIngredients">Ingredients to avoid (optional)</label>
+                <input
+                    type="text"
+                    class="form-input"
+                    id="avoidedIngredients"
+                    placeholder="e.g., fragrance, alcohol, sulfates (press Enter to add)"
+                >
+                <div class="tags-display" id="avoidedTags"></div>
+            </div>
+        </div>
+
+        <button type="submit" class="submit-button" id="submitBtn">
+            {% if update_mode %}Update My Routine{% else %}Generate My Routine{% endif %}
+        </button>
+    </form>
+
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p style="color: #6B6560;">Creating your personalized routine...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Tag input functionality
+    const preferredTags = [];
+    const avoidedTags = [];
+
+    function setupTagInput(inputId, tagsDisplayId, tagsArray) {
+        const input = document.getElementById(inputId);
+        const display = document.getElementById(tagsDisplayId);
+
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const value = input.value.trim();
+                if (value && !tagsArray.includes(value)) {
+                    tagsArray.push(value);
+                    renderTags(display, tagsArray);
+                    input.value = '';
+                }
+            }
+        });
+    }
+
+    function renderTags(display, tagsArray) {
+        display.innerHTML = tagsArray.map((tag, index) => `
+            <span class="tag">
+                ${tag}
+                <span class="tag-remove" onclick="removeTag('${display.id}', ${index})">&times;</span>
+            </span>
+        `).join('');
+    }
+
+    function removeTag(displayId, index) {
+        const display = document.getElementById(displayId);
+        const tagsArray = displayId === 'preferredTags' ? preferredTags : avoidedTags;
+        tagsArray.splice(index, 1);
+        renderTags(display, tagsArray);
+    }
+
+    setupTagInput('preferredIngredients', 'preferredTags', preferredTags);
+    setupTagInput('avoidedIngredients', 'avoidedTags', avoidedTags);
+
+    // Pre-fill form if in update mode
+    {% if update_mode and routine_data %}
+    window.addEventListener('DOMContentLoaded', () => {
+        const routineData = {{ routine_data | tojson }};
+
+        // Pre-fill skin type
+        if (routineData.skin_type) {
+            document.getElementById('skinType').value = routineData.skin_type;
+        }
+
+        // Pre-fill budget
+        if (routineData.budget) {
+            document.getElementById('budget').value = routineData.budget;
+        }
+
+        // Pre-check concerns
+        if (routineData.concerns) {
+            routineData.concerns.forEach(concern => {
+                const checkbox = document.getElementById(concern);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+
+        // Pre-check lifestyle
+        if (routineData.lifestyle) {
+            routineData.lifestyle.forEach(item => {
+                const checkbox = document.getElementById(item);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+
+        // Pre-fill preferred ingredients
+        if (routineData.preferred_ingredients) {
+            routineData.preferred_ingredients.forEach(ingredient => {
+                if (ingredient && !preferredTags.includes(ingredient)) {
+                    preferredTags.push(ingredient);
+                }
+            });
+            renderTags(document.getElementById('preferredTags'), preferredTags);
+        }
+
+        // Pre-fill avoided ingredients
+        if (routineData.avoided_ingredients) {
+            routineData.avoided_ingredients.forEach(ingredient => {
+                if (ingredient && !avoidedTags.includes(ingredient)) {
+                    avoidedTags.push(ingredient);
+                }
+            });
+            renderTags(document.getElementById('avoidedTags'), avoidedTags);
+        }
+    });
+    {% endif %}
+
+    // Form submission
+    document.getElementById('routineForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submitBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const form = document.getElementById('routineForm');
+
+        // Get form data
+        const skinType = document.getElementById('skinType').value;
+        const budget = document.getElementById('budget').value;
+        const concerns = Array.from(document.querySelectorAll('input[name="concerns"]:checked'))
+            .map(cb => cb.value);
+        const lifestyle = Array.from(document.querySelectorAll('input[name="lifestyle"]:checked'))
+            .map(cb => cb.value);
+
+        if (!skinType) {
+            alert('Please select your skin type');
+            return;
+        }
+
+        if (!budget) {
+            alert('Please select your budget preference');
+            return;
+        }
+
+        // First, check if user has existing routines
+        try {
+            const checkResponse = await fetch('/api/check-existing-routine', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    skin_type: skinType,
+                    concerns: concerns,
+                    budget: budget,
+                    lifestyle: lifestyle
+                })
+            });
+
+            const checkData = await checkResponse.json();
+
+            if (checkData.authenticated && checkData.has_existing) {
+                if (checkData.is_identical) {
+                    // Identical routine exists
+                    if (!confirm('You already have an identical routine saved. Do you want to view it instead of creating a new one?')) {
+                        return; // User cancelled
+                    }
+                    // TODO: Redirect to saved routines page
+                    window.location.href = '/api/user/routines';
+                    return;
+                } else {
+                    // Different routine exists - ask user
+                    const choice = confirm(
+                        'You have a different routine saved. Do you want to UPDATE your existing routine with these new preferences?\n\n' +
+                        'Click OK to update, or Cancel to create a new routine.'
+                    );
+                    // Store choice for later use
+                    sessionStorage.setItem('update_existing', choice ? 'true' : 'false');
+                    if (choice) {
+                        sessionStorage.setItem('existing_routine_id', checkData.existing_routine.id);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error checking existing routine:', error);
+            // Continue with generation if check fails
+        }
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Generating...';
+        form.style.display = 'none';
+        loadingSpinner.style.display = 'block';
+
+        try {
+            const response = await fetch('/api/generate-routine', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    skin_type: skinType,
+                    concerns: concerns,
+                    budget: budget,
+                    lifestyle: lifestyle,
+                    preferred_ingredients: preferredTags,
+                    avoided_ingredients: avoidedTags
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Redirect to results page
+                window.location.href = `/routine-results/${data.session_id}`;
+            } else {
+                throw new Error(data.error || 'Failed to generate routine');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to generate routine. Please try again.');
+
+            // Reset form
+            form.style.display = 'block';
+            loadingSpinner.style.display = 'none';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Generate My Routine';
+        }
+    });
+</script>
+{% endblock %}

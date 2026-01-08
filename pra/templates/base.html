@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SkinRoutine{% endblock %}</title>
+
+    <!-- Common Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Page-specific styles -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Common Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-logo">
+                <a href="/">SkinRoutine</a>
+            </div>
+            <nav class="header-nav">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/build-routine" class="nav-link">Routine</a>
+                <a href="/deals" class="nav-link">Deals</a>
+                <a href="/community" class="nav-link">Community</a>
+            </nav>
+            <div class="header-actions" id="headerActions">
+                <a href="/auth" class="account-link">Log In</a>
+                <a href="/auth" class="account-link signup">Sign Up</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content (each page provides this) -->
+    {% block content %}{% endblock %}
+
+    <!-- Common Session Check Script -->
+    <script>
+        // Check if user is logged in and update header
+        async function checkUserSession() {
+            try {
+                const response = await fetch('/current-user');
+                const data = await response.json();
+
+                const headerActions = document.getElementById('headerActions');
+
+                if (data.authenticated && data.user) {
+                    headerActions.innerHTML = `
+                        <span class="account-link" style="cursor: default;">Hi, ${data.user.name}</span>
+                        <button class="account-link signup" onclick="logout()" style="border: none; cursor: pointer;">Log Out</button>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error checking user session:', error);
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+                window.location.href = '/';
+            }
+        }
+
+        // Check session on page load
+        checkUserSession();
+    </script>
+
+    <!-- Page-specific scripts -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

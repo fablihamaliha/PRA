@@ -8,6 +8,7 @@ import traceback
 from dotenv import load_dotenv
 import os
 import re
+from pra.blueprints.routine_builder import routine_builder_bp
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,7 +18,9 @@ login_manager = LoginManager()
 #testing
 
 def create_app(config_class=Config):
+    #building a new house with a static storage room
     app = Flask(__name__, static_folder='static')
+    #configure the house according to the blueprint
     app.config.from_object(config_class)
 
     # Enable CORS for all routes
@@ -36,7 +39,7 @@ def create_app(config_class=Config):
     )
     logger = logging.getLogger(__name__)
 
-    # Initialize database
+    # Initialize database connects db object to flask app 
     db.init_app(app)
 
     # Initialize Flask-Login
@@ -44,6 +47,7 @@ def create_app(config_class=Config):
     login_manager.login_view = 'auth_page'
     login_manager.login_message = 'Please log in to access this page.'
 
+    # use this function to load users 
     @login_manager.user_loader
     def load_user(user_id):
         from pra.models.user import User
@@ -52,16 +56,19 @@ def create_app(config_class=Config):
     # Import blueprints here to avoid circular imports
     from pra.blueprints.skincare import skincare_bp
     from pra.blueprints.deals import deals_bp
+    from pra.blueprints.community import community_bp
 
     # Register blueprints
     app.register_blueprint(skincare_bp, url_prefix='/skincare')
     app.register_blueprint(deals_bp, url_prefix='/deals')
+    app.register_blueprint(community_bp, url_prefix='/community')
+    app.register_blueprint(routine_builder_bp)
 
     # Create tables
     with app.app_context():
         try:
             # Import models here to ensure they're registered
-            from pra.models import user, skin_profile, product, recommendation
+            from pra.models import user, skin_profile, product, recommendation, routine, community
             db.create_all()
             logger.info("Database tables created successfully")
 
@@ -95,6 +102,11 @@ def create_app(config_class=Config):
     def auth_page():
         return render_template('auth.html')
 
+    @app.route('/todays-deals')
+    def todays_deals():
+        """Today's deals page with current sales"""
+        return render_template('todays_deals.html')
+
     @app.route('/login', methods=['POST'])
     def login():
         try:
@@ -118,7 +130,7 @@ def create_app(config_class=Config):
                 }), 400
 
             # Find user
-            from models.user import User
+            from pra.models.user import User
             user = User.query.filter_by(email=email).first()
 
             if not user or not user.check_password(password):
@@ -135,12 +147,13 @@ def create_app(config_class=Config):
 
             # Login user
             login_user(user, remember=True)
+            session.permanent = True
             logger.info(f"User logged in: {user.email}")
 
             return jsonify({
                 'success': True,
-                'message': 'Login successful!',
-                'redirect': '/deals',
+                'message': f'Welcome back, {user.name}!',
+                'redirect': '/',
                 'user': user.to_dict()
             }), 200
 
@@ -183,7 +196,7 @@ def create_app(config_class=Config):
                 }), 400
 
             # Check if user already exists
-            from models.user import User
+            from pra.models.user import User
             existing_user = User.query.filter_by(email=email).first()
             if existing_user:
                 return jsonify({
@@ -200,12 +213,13 @@ def create_app(config_class=Config):
 
             # Auto-login the user
             login_user(new_user, remember=True)
+            session.permanent = True
             logger.info(f"New user created and logged in: {new_user.email}")
 
             return jsonify({
                 'success': True,
-                'message': 'Account created successfully!',
-                'redirect': '/deals',
+                'message': f'Welcome, {new_user.name}! Your account has been created.',
+                'redirect': '/',
                 'user': new_user.to_dict()
             }), 201
 

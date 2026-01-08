@@ -1,0 +1,511 @@
+{% extends "base.html" %}
+
+{% block title %}Community | SkinRoutine{% endblock %}
+
+{% block extra_css %}
+<style>
+    .community-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 80px 24px 60px;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    .page-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 44px;
+        font-weight: 600;
+        color: #2C2421;
+        margin-bottom: 16px;
+    }
+
+    .page-subtitle {
+        font-size: 17px;
+        color: #6B6560;
+        line-height: 1.6;
+    }
+
+    .search-section {
+        background: #FFFFFF;
+        padding: 32px;
+        border-radius: 16px;
+        border: 1px solid #F0EDE8;
+        margin-bottom: 40px;
+    }
+
+    .search-box {
+        display: flex;
+        gap: 12px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 14px 18px;
+        font-size: 15px;
+        border: 1px solid #E8E4DF;
+        border-radius: 12px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+        border-color: #C9A88F;
+        box-shadow: 0 0 0 3px rgba(201, 168, 143, 0.08);
+    }
+
+    .search-btn {
+        padding: 14px 32px;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(201, 168, 143, 0.3);
+    }
+
+    .search-results {
+        margin-top: 20px;
+        display: none;
+    }
+
+    .product-result {
+        padding: 12px;
+        border: 1px solid #E8E4DF;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .product-result:hover {
+        background: #FAF8F5;
+        border-color: #C9A88F;
+    }
+
+    .comments-section {
+        display: grid;
+        gap: 24px;
+    }
+
+    .comment-card {
+        background: #FFFFFF;
+        padding: 32px;
+        border-radius: 16px;
+        border: 1px solid #F0EDE8;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+
+    .comment-user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FFFFFF;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #1A1A1A;
+        font-size: 15px;
+    }
+
+    .comment-date {
+        font-size: 13px;
+        color: #6B6560;
+    }
+
+    .comment-rating {
+        display: flex;
+        gap: 4px;
+        color: #F59E0B;
+    }
+
+    .product-link {
+        font-size: 14px;
+        color: #C9A88F;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 12px;
+        display: inline-block;
+    }
+
+    .product-link:hover {
+        text-decoration: underline;
+    }
+
+    .comment-text {
+        color: #3D3D3D;
+        line-height: 1.6;
+        margin-bottom: 16px;
+    }
+
+    .comment-actions {
+        display: flex;
+        gap: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #F0EDE8;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border: none;
+        background: transparent;
+        color: #6B6560;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .action-btn:hover {
+        background: #FAF8F5;
+        color: #C9A88F;
+    }
+
+    .action-btn.active {
+        color: #C9A88F;
+        font-weight: 500;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 24px;
+        color: #6B6560;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
+
+    .comment-form-section {
+        background: #FFFFFF;
+        padding: 32px;
+        border-radius: 16px;
+        border: 1px solid #F0EDE8;
+        margin-bottom: 40px;
+        display: none;
+    }
+
+    .comment-form-section.active {
+        display: block;
+    }
+
+    .rating-input {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .star-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #E8E4DF;
+        transition: color 0.3s ease;
+    }
+
+    .star-btn:hover,
+    .star-btn.active {
+        color: #F59E0B;
+    }
+
+    .comment-textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 14px 18px;
+        font-size: 15px;
+        font-family: 'Inter', sans-serif;
+        border: 1px solid #E8E4DF;
+        border-radius: 12px;
+        outline: none;
+        resize: vertical;
+        transition: all 0.3s ease;
+    }
+
+    .comment-textarea:focus {
+        border-color: #C9A88F;
+        box-shadow: 0 0 0 3px rgba(201, 168, 143, 0.08);
+    }
+
+    .submit-comment-btn {
+        margin-top: 12px;
+        padding: 14px 32px;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .submit-comment-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(201, 168, 143, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="community-container">
+    <div class="page-header">
+        <h1 class="page-title">Community</h1>
+        <p class="page-subtitle">Share your skincare experiences and read reviews from others</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="search-box">
+            <input
+                type="text"
+                class="search-input"
+                id="productSearch"
+                placeholder="Search for a product to review..."
+            >
+            <button class="search-btn" onclick="searchProducts()">Search</button>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <!-- Comment Form (shown when product selected) -->
+    <div class="comment-form-section" id="commentForm">
+        <h3 style="margin-bottom: 16px; font-family: 'Cormorant Garamond', Georgia, serif;">Add Your Review</h3>
+        <div class="product-info" id="selectedProduct"></div>
+
+        <label style="display: block; margin-bottom: 8px; font-weight: 500;">Rating (optional)</label>
+        <div class="rating-input" id="ratingInput">
+            <button class="star-btn" data-rating="1">★</button>
+            <button class="star-btn" data-rating="2">★</button>
+            <button class="star-btn" data-rating="3">★</button>
+            <button class="star-btn" data-rating="4">★</button>
+            <button class="star-btn" data-rating="5">★</button>
+        </div>
+
+        <textarea
+            class="comment-textarea"
+            id="commentText"
+            placeholder="Share your experience with this product..."
+        ></textarea>
+
+        <button class="submit-comment-btn" onclick="submitComment()">Post Review</button>
+    </div>
+
+    <!-- Recent Comments -->
+    <div class="comments-section">
+        {% if comments %}
+            {% for comment in comments %}
+            <div class="comment-card">
+                <div class="comment-header">
+                    <div class="comment-user-info">
+                        <div class="user-avatar">
+                            {{ comment.user.name[0].upper() if comment.user else 'A' }}
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name">{{ comment.user.name if comment.user else 'Anonymous' }}</span>
+                            <span class="comment-date">{{ comment.created_at.strftime('%B %d, %Y') }}</span>
+                        </div>
+                    </div>
+                    {% if comment.rating %}
+                    <div class="comment-rating">
+                        {% for i in range(comment.rating) %}★{% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <a href="/community/product/{{ comment.product_id }}" class="product-link">
+                    {{ comment.product.brand }} - {{ comment.product.name }}
+                </a>
+
+                <p class="comment-text">{{ comment.comment_text }}</p>
+
+                <div class="comment-actions">
+                    <button class="action-btn" onclick="markHelpful({{ comment.id }})">
+                        <span>👍</span>
+                        <span>Helpful ({{ comment.helpful_count }})</span>
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">💬</div>
+                <h3>No reviews yet</h3>
+                <p>Be the first to share your experience!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let selectedProductId = null;
+    let selectedRating = null;
+
+    // Search products
+    async function searchProducts() {
+        const query = document.getElementById('productSearch').value.trim();
+        const resultsDiv = document.getElementById('searchResults');
+
+        if (!query) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/community/api/search-products?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+
+            if (data.success && data.products.length > 0) {
+                resultsDiv.innerHTML = data.products.map(product => `
+                    <div class="product-result" onclick="selectProduct(${product.id}, '${product.brand}', '${product.name}')">
+                        <strong>${product.brand}</strong> - ${product.name}
+                        ${product.price ? `<span style="color: #6B6560; margin-left: 8px;">$${product.price}</span>` : ''}
+                    </div>
+                `).join('');
+                resultsDiv.style.display = 'block';
+            } else {
+                resultsDiv.innerHTML = '<p style="padding: 12px; color: #6B6560;">No products found</p>';
+                resultsDiv.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error searching products:', error);
+            alert('Failed to search products');
+        }
+    }
+
+    // Select product to review
+    function selectProduct(productId, brand, name) {
+        selectedProductId = productId;
+        document.getElementById('selectedProduct').innerHTML = `
+            <p style="margin-bottom: 16px;"><strong>Product:</strong> ${brand} - ${name}</p>
+        `;
+        document.getElementById('commentForm').classList.add('active');
+        document.getElementById('searchResults').style.display = 'none';
+    }
+
+    // Rating stars
+    document.querySelectorAll('.star-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            selectedRating = parseInt(this.dataset.rating);
+            document.querySelectorAll('.star-btn').forEach((star, index) => {
+                if (index < selectedRating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        });
+    });
+
+    // Submit comment
+    async function submitComment() {
+        {% if not current_user.is_authenticated %}
+            alert('Please log in to post a review');
+            window.location.href = '/auth';
+            return;
+        {% endif %}
+
+        const commentText = document.getElementById('commentText').value.trim();
+
+        if (!selectedProductId) {
+            alert('Please select a product first');
+            return;
+        }
+
+        if (!commentText) {
+            alert('Please enter a review');
+            return;
+        }
+
+        try {
+            const response = await fetch('/community/api/comment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    product_id: selectedProductId,
+                    comment_text: commentText,
+                    rating: selectedRating
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Review posted successfully!');
+                window.location.reload();
+            } else {
+                alert(data.error || 'Failed to post review');
+            }
+        } catch (error) {
+            console.error('Error posting review:', error);
+            alert('Failed to post review');
+        }
+    }
+
+    // Mark comment as helpful
+    async function markHelpful(commentId) {
+        {% if not current_user.is_authenticated %}
+            alert('Please log in to mark reviews as helpful');
+            window.location.href = '/auth';
+            return;
+        {% endif %}
+
+        try {
+            const response = await fetch(`/community/api/comment/${commentId}/helpful`, {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error('Error marking helpful:', error);
+        }
+    }
+</script>
+{% endblock %}

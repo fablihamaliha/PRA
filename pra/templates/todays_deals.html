@@ -1,0 +1,476 @@
+{% extends "base.html" %}
+
+{% block title %}Today's Deals | SkinRoutine{% endblock %}
+
+{% block extra_css %}
+<style>
+    .deals-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 80px 24px 60px;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    .page-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 44px;
+        font-weight: 600;
+        color: #2C2421;
+        margin-bottom: 16px;
+    }
+
+    .page-subtitle {
+        font-size: 17px;
+        color: #6B6560;
+        line-height: 1.6;
+    }
+
+    .refresh-banner {
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        padding: 16px 24px;
+        border-radius: 12px;
+        margin-bottom: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #FFFFFF;
+    }
+
+    .refresh-info {
+        font-size: 14px;
+    }
+
+    .refresh-btn {
+        padding: 10px 20px;
+        background: #FFFFFF;
+        color: #C9A88F;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+        transform: scale(1.05);
+    }
+
+    .filters-section {
+        background: #FFFFFF;
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid #F0EDE8;
+        margin-bottom: 32px;
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #3D3D3D;
+        margin-bottom: 8px;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #E8E4DF;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    .filter-select:focus {
+        border-color: #C9A88F;
+        box-shadow: 0 0 0 3px rgba(201, 168, 143, 0.08);
+    }
+
+    .deals-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+    }
+
+    .deal-card {
+        background: #FFFFFF;
+        border-radius: 16px;
+        border: 1px solid #F0EDE8;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .deal-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .deal-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: #EF4444;
+        color: #FFFFFF;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        z-index: 1;
+    }
+
+    .deal-image-container {
+        position: relative;
+        width: 100%;
+        height: 220px;
+        background: #FAF8F5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .deal-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    .deal-placeholder {
+        font-size: 64px;
+        opacity: 0.3;
+    }
+
+    .deal-content {
+        padding: 20px;
+    }
+
+    .deal-retailer {
+        font-size: 12px;
+        color: #C9A88F;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .deal-product-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1A1A1A;
+        margin-bottom: 8px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .deal-pricing {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .deal-current-price {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1A1A1A;
+    }
+
+    .deal-original-price {
+        font-size: 16px;
+        color: #6B6560;
+        text-decoration: line-through;
+    }
+
+    .deal-savings {
+        background: #FEF3C7;
+        color: #92400E;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        display: inline-block;
+    }
+
+    .deal-expires {
+        font-size: 13px;
+        color: #EF4444;
+        margin-bottom: 16px;
+    }
+
+    .view-deal-btn {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .view-deal-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(201, 168, 143, 0.3);
+    }
+
+    .loading-spinner {
+        text-align: center;
+        padding: 60px;
+    }
+
+    .spinner {
+        border: 3px solid #F0EDE8;
+        border-top: 3px solid #C9A88F;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        color: #6B6560;
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+    }
+
+    .coming-soon-badge {
+        display: inline-block;
+        background: #FEF3C7;
+        color: #92400E;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Main Content -->
+<div class="deals-container">
+    <div class="page-header">
+        <h1 class="page-title">Today's Deals</h1>
+        <p class="page-subtitle">Daily beauty steals from top retailers like Ulta, Sephora, and Amazon</p>
+        <span class="coming-soon-badge">Live Scraping Coming Soon</span>
+    </div>
+
+    <!-- Refresh Banner -->
+    <div class="refresh-banner">
+        <div class="refresh-info">
+            <strong>Updated:</strong> Every 6 hours
+            <span style="margin-left: 16px;">🔥 <strong>{{ sample_deals|length if sample_deals else 0 }}</strong> active deals</span>
+        </div>
+        <button class="refresh-btn" onclick="refreshDeals()">Refresh Now</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label class="filter-label">Retailer</label>
+                <select class="filter-select" id="retailerFilter" onchange="filterDeals()">
+                    <option value="all">All Retailers</option>
+                    <option value="ulta">Ulta</option>
+                    <option value="sephora">Sephora</option>
+                    <option value="amazon">Amazon</option>
+                    <option value="target">Target</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Category</label>
+                <select class="filter-select" id="categoryFilter" onchange="filterDeals()">
+                    <option value="all">All Categories</option>
+                    <option value="cleanser">Cleansers</option>
+                    <option value="moisturizer">Moisturizers</option>
+                    <option value="serum">Serums</option>
+                    <option value="sunscreen">Sunscreen</option>
+                    <option value="mask">Masks</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Discount</label>
+                <select class="filter-select" id="discountFilter" onchange="filterDeals()">
+                    <option value="all">All Discounts</option>
+                    <option value="20">20% or more</option>
+                    <option value="30">30% or more</option>
+                    <option value="50">50% or more</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deals Grid -->
+    <div class="deals-grid" id="dealsGrid">
+        <!-- Sample deals - will be replaced with scraped data -->
+        <div class="deal-card">
+            <div class="deal-image-container">
+                <span class="deal-badge">-35%</span>
+                <div class="deal-placeholder">🧴</div>
+            </div>
+            <div class="deal-content">
+                <div class="deal-retailer">ULTA</div>
+                <h3 class="deal-product-name">CeraVe Hydrating Facial Cleanser</h3>
+                <div class="deal-pricing">
+                    <span class="deal-current-price">$12.99</span>
+                    <span class="deal-original-price">$19.99</span>
+                </div>
+                <div class="deal-savings">Save $7.00</div>
+                <p class="deal-expires">⏰ Ends in 2 days</p>
+                <button class="view-deal-btn" onclick="alert('Link to product will be added when scraping is implemented')">View Deal</button>
+            </div>
+        </div>
+
+        <div class="deal-card">
+            <div class="deal-image-container">
+                <span class="deal-badge">-50%</span>
+                <div class="deal-placeholder">✨</div>
+            </div>
+            <div class="deal-content">
+                <div class="deal-retailer">SEPHORA</div>
+                <h3 class="deal-product-name">The Ordinary Niacinamide 10% + Zinc 1%</h3>
+                <div class="deal-pricing">
+                    <span class="deal-current-price">$6.00</span>
+                    <span class="deal-original-price">$12.00</span>
+                </div>
+                <div class="deal-savings">Save $6.00</div>
+                <p class="deal-expires">⏰ Ends today</p>
+                <button class="view-deal-btn" onclick="alert('Link to product will be added when scraping is implemented')">View Deal</button>
+            </div>
+        </div>
+
+        <div class="deal-card">
+            <div class="deal-image-container">
+                <span class="deal-badge">-25%</span>
+                <div class="deal-placeholder">☀️</div>
+            </div>
+            <div class="deal-content">
+                <div class="deal-retailer">AMAZON</div>
+                <h3 class="deal-product-name">La Roche-Posay Anthelios Sunscreen SPF 50</h3>
+                <div class="deal-pricing">
+                    <span class="deal-current-price">$26.24</span>
+                    <span class="deal-original-price">$34.99</span>
+                </div>
+                <div class="deal-savings">Save $8.75</div>
+                <p class="deal-expires">⏰ Ends in 5 days</p>
+                <button class="view-deal-btn" onclick="alert('Link to product will be added when scraping is implemented')">View Deal</button>
+            </div>
+        </div>
+
+        <div class="deal-card">
+            <div class="deal-image-container">
+                <span class="deal-badge">-40%</span>
+                <div class="deal-placeholder">🌙</div>
+            </div>
+            <div class="deal-content">
+                <div class="deal-retailer">ULTA</div>
+                <h3 class="deal-product-name">Neutrogena Hydro Boost Water Gel</h3>
+                <div class="deal-pricing">
+                    <span class="deal-current-price">$14.99</span>
+                    <span class="deal-original-price">$24.99</span>
+                </div>
+                <div class="deal-savings">Save $10.00</div>
+                <p class="deal-expires">⏰ Ends in 1 day</p>
+                <button class="view-deal-btn" onclick="alert('Link to product will be added when scraping is implemented')">View Deal</button>
+            </div>
+        </div>
+
+        <div class="deal-card">
+            <div class="deal-image-container">
+                <span class="deal-badge">-30%</span>
+                <div class="deal-placeholder">💆</div>
+            </div>
+            <div class="deal-content">
+                <div class="deal-retailer">TARGET</div>
+                <h3 class="deal-product-name">Cetaphil Gentle Skin Cleanser</h3>
+                <div class="deal-pricing">
+                    <span class="deal-current-price">$10.49</span>
+                    <span class="deal-original-price">$14.99</span>
+                </div>
+                <div class="deal-savings">Save $4.50</div>
+                <p class="deal-expires">⏰ Ends in 3 days</p>
+                <button class="view-deal-btn" onclick="alert('Link to product will be added when scraping is implemented')">View Deal</button>
+            </div>
+        </div>
+
+        <div class="deal-card">
+            <div class="deal-image-container">
+                <span class="deal-badge">-45%</span>
+                <div class="deal-placeholder">🎭</div>
+            </div>
+            <div class="deal-content">
+                <div class="deal-retailer">SEPHORA</div>
+                <h3 class="deal-product-name">Origins Clear Improvement Active Charcoal Mask</h3>
+                <div class="deal-pricing">
+                    <span class="deal-current-price">$16.50</span>
+                    <span class="deal-original-price">$30.00</span>
+                </div>
+                <div class="deal-savings">Save $13.50</div>
+                <p class="deal-expires">⏰ Ends today</p>
+                <button class="view-deal-btn" onclick="alert('Link to product will be added when scraping is implemented')">View Deal</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function refreshDeals() {
+        const spinner = document.createElement('div');
+        spinner.className = 'loading-spinner';
+        spinner.innerHTML = '<div class="spinner"></div><p style="color: #6B6560;">Refreshing deals...</p>';
+
+        const grid = document.getElementById('dealsGrid');
+        grid.innerHTML = '';
+        grid.appendChild(spinner);
+
+        // Simulate refresh (will be replaced with actual API call)
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    }
+
+    function filterDeals() {
+        // Placeholder for filtering functionality
+        // Will be implemented when scraping is active
+        const retailer = document.getElementById('retailerFilter').value;
+        const category = document.getElementById('categoryFilter').value;
+        const discount = document.getElementById('discountFilter').value;
+
+        console.log('Filters:', { retailer, category, discount });
+        // Filter logic will go here
+    }
+</script>
+{% endblock %}

@@ -1,573 +1,573 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Find the best deals on your favorite products across multiple retailers">
-    <title>Product Deal Finder - Compare Prices & Save Money</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/deal_finder.css') }}">
-</head>
-<body>
-    <!-- Hero Section with Search -->
-    <div class="hero-section">
-        <div class="hero-content">
-            <h1 class="hero-title">Find the Best Deals</h1>
-            <p class="hero-subtitle">Compare prices from top retailers and save money on your favorite products</p>
+{% extends "base.html" %}
 
-            <!-- Search Form -->
-            <form class="search-form" id="searchForm" role="search">
-                <div class="search-container">
-                    <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="m21 21-4.35-4.35"></path>
-                    </svg>
-                    <input
-                        type="text"
-                        id="productSearch"
-                        class="search-input"
-                        placeholder="Enter product name (e.g., Jergens, iPhone, Nike shoes)"
-                        autocomplete="off"
-                        required
-                        aria-label="Search for products"
-                        aria-describedby="search-hint"
-                    >
-                    <button type="submit" class="search-btn" aria-label="Search for deals">
-                        Search Deals
-                    </button>
-                </div>
-                <div class="search-options">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="useLocation" checked>
-                        <span>Use my location for local deals</span>
-                    </label>
-                    <p class="search-hint" id="search-hint">We'll compare prices from Google Shopping, Walmart, Target, Best Buy, and more</p>
-                </div>
-            </form>
-        </div>
-    </div>
+{% block title %}Product Deal Finder - Compare Prices & Save Money{% endblock %}
 
-    <!-- Main Content Area -->
-    <div class="main-content" id="mainContent">
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/deal_finder.css') }}">
+{% endblock %}
 
-        <!-- Empty State (Initial) -->
-        <div class="empty-state" id="emptyState">
-            <svg class="empty-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="9" cy="9" r="7"></circle>
-                <path d="m16 16 5 5"></path>
-                <path d="M9 6v6"></path>
-                <path d="M6 9h6"></path>
-            </svg>
-            <h2 class="empty-title">Start Your Search</h2>
-            <p class="empty-description">
-                Enter a product name above to find the best deals from multiple online retailers.
-                We'll compare prices and show you where to save the most money.
-            </p>
-            <div class="example-searches">
-                <p class="examples-label">Try searching for:</p>
-                <div class="example-tags">
-                    <button class="example-tag" data-search="Jergens Lotion">Jergens Lotion</button>
-                    <button class="example-tag" data-search="Nike Air Max">Nike Air Max</button>
-                    <button class="example-tag" data-search="iPhone 15">iPhone 15</button>
-                    <button class="example-tag" data-search="Sony Headphones">Sony Headphones</button>
-                </div>
-            </div>
-        </div>
+{% block content %}
+<!-- Hero Section with Search -->
+<div class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">Find the Best Deals</h1>
+        <p class="hero-subtitle">Compare prices from top retailers and save money on your favorite products</p>
 
-        <!-- Loading State -->
-        <div class="loading-state hidden" id="loadingState">
-            <div class="loading-spinner" role="status">
-                <svg class="spinner-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+        <!-- Search Form -->
+        <form class="search-form" id="searchForm" role="search">
+            <div class="search-container">
+                <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
                 </svg>
+                <input
+                    type="text"
+                    id="productSearch"
+                    class="search-input"
+                    placeholder="Enter product name (e.g., Jergens, iPhone, Nike shoes)"
+                    autocomplete="off"
+                    required
+                    aria-label="Search for products"
+                    aria-describedby="search-hint"
+                >
+                <button type="submit" class="search-btn" aria-label="Search for deals">
+                    Search Deals
+                </button>
             </div>
-            <h2 class="loading-title">Searching for the best deals...</h2>
-            <p class="loading-description" id="loadingDescription">Comparing prices across multiple retailers</p>
-            <div class="loading-sources">
-                <span class="source-badge loading" data-source="google_shopping">Google Shopping</span>
-                <span class="source-badge loading" data-source="walmart">Walmart</span>
-                <span class="source-badge loading" data-source="target">Target</span>
-                <span class="source-badge loading" data-source="bestbuy">Best Buy</span>
-                <span class="source-badge loading" data-source="amazon">Amazon</span>
+            <div class="search-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="useLocation" checked>
+                    <span>Use my location for local deals</span>
+                </label>
+                <p class="search-hint" id="search-hint">We'll compare prices from Google Shopping, Walmart, Target, Best Buy, and more</p>
             </div>
-        </div>
-
-        <!-- Error State -->
-        <div class="error-state hidden" id="errorState">
-            <svg class="error-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <h2 class="error-title">Oops! Something went wrong</h2>
-            <p class="error-description" id="errorMessage">
-                We couldn't find any deals at the moment. Please try again or search for a different product.
-            </p>
-            <button class="btn btn-primary" id="retryBtn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-                </svg>
-                Try Again
-            </button>
-        </div>
-
-        <!-- Results Section -->
-        <div class="results-section hidden" id="resultsSection">
-            <div class="results-header">
-                <h2 class="results-title">Best Deals for "<span id="searchedProduct"></span>"</h2>
-                <div class="results-meta">
-                    <p class="results-count" id="resultsCount">Found 0 deals</p>
-                    <p class="results-location" id="resultsLocation"></p>
-                </div>
-            </div>
-
-            <!-- Shopping Journey Summary -->
-            <div class="shopping-journey" id="shoppingJourney">
-                <div class="journey-header">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                    <h3>My Shopping Journey</h3>
-                </div>
-                <p class="journey-intro">I searched across multiple retailers to find you the best deal:</p>
-                <div class="journey-steps" id="journeySteps">
-                    <!-- Journey steps will be inserted here -->
-                </div>
-                <div class="journey-conclusion">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                    </svg>
-                    <p id="journeyConclusion"></p>
-                </div>
-            </div>
-
-            <!-- Top Deal Card -->
-            <div class="top-deal-section" id="topDealSection">
-                <div class="section-badge">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                    </svg>
-                    Best Deal
-                </div>
-                <div class="deal-card top-deal" id="topDealCard">
-                    <!-- Top deal will be inserted here by JavaScript -->
-                </div>
-            </div>
-
-            <!-- Alternative Offers -->
-            <div class="alternatives-section" id="alternativesSection">
-                <h3 class="section-title">More Options</h3>
-                <div class="deals-grid" id="dealsGrid">
-                    <!-- Alternative deals will be inserted here by JavaScript -->
-                </div>
-            </div>
-        </div>
+        </form>
     </div>
+</div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <p class="footer-text">
-            Prices are updated in real-time from multiple sources. Clicking "Buy" will take you directly to the retailer's website.
-            <a href="#" class="footer-link">Learn more</a>
+<!-- Main Content Area -->
+<div class="main-content" id="mainContent">
+
+    <!-- Empty State (Initial) -->
+    <div class="empty-state" id="emptyState">
+        <svg class="empty-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="9" cy="9" r="7"></circle>
+            <path d="m16 16 5 5"></path>
+            <path d="M9 6v6"></path>
+            <path d="M6 9h6"></path>
+        </svg>
+        <h2 class="empty-title">Start Your Search</h2>
+        <p class="empty-description">
+            Enter a product name above to find the best deals from multiple online retailers.
+            We'll compare prices and show you where to save the most money.
         </p>
-    </footer>
+        <div class="example-searches">
+            <p class="examples-label">Try searching for:</p>
+            <div class="example-tags">
+                <button class="example-tag" data-search="Jergens Lotion">Jergens Lotion</button>
+                <button class="example-tag" data-search="Nike Air Max">Nike Air Max</button>
+                <button class="example-tag" data-search="iPhone 15">iPhone 15</button>
+                <button class="example-tag" data-search="Sony Headphones">Sony Headphones</button>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        // Configuration
-        const API_BASE_URL = window.location.origin + '/deals/api';
+    <!-- Loading State -->
+    <div class="loading-state hidden" id="loadingState">
+        <div class="loading-spinner" role="status">
+            <svg class="spinner-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+            </svg>
+        </div>
+        <h2 class="loading-title">Searching for the best deals...</h2>
+        <p class="loading-description" id="loadingDescription">Comparing prices across multiple retailers</p>
+        <div class="loading-sources">
+            <span class="source-badge loading" data-source="google_shopping">Google Shopping</span>
+            <span class="source-badge loading" data-source="walmart">Walmart</span>
+            <span class="source-badge loading" data-source="target">Target</span>
+            <span class="source-badge loading" data-source="bestbuy">Best Buy</span>
+            <span class="source-badge loading" data-source="amazon">Amazon</span>
+        </div>
+    </div>
 
-        // State management
-        let currentSearch = '';
-        let currentDeals = [];
-        let userLocation = null;
+    <!-- Error State -->
+    <div class="error-state hidden" id="errorState">
+        <svg class="error-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h2 class="error-title">Oops! Something went wrong</h2>
+        <p class="error-description" id="errorMessage">
+            We couldn't find any deals at the moment. Please try again or search for a different product.
+        </p>
+        <button class="btn btn-primary" id="retryBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+            </svg>
+            Try Again
+        </button>
+    </div>
 
-        // DOM elements
-        const searchForm = document.getElementById('searchForm');
-        const productSearch = document.getElementById('productSearch');
-        const useLocationCheckbox = document.getElementById('useLocation');
-        const emptyState = document.getElementById('emptyState');
-        const loadingState = document.getElementById('loadingState');
-        const errorState = document.getElementById('errorState');
-        const resultsSection = document.getElementById('resultsSection');
-        const retryBtn = document.getElementById('retryBtn');
-        const exampleTags = document.querySelectorAll('.example-tag');
+    <!-- Results Section -->
+    <div class="results-section hidden" id="resultsSection">
+        <div class="results-header">
+            <h2 class="results-title">Best Deals for "<span id="searchedProduct"></span>"</h2>
+            <div class="results-meta">
+                <p class="results-count" id="resultsCount">Found 0 deals</p>
+                <p class="results-location" id="resultsLocation"></p>
+            </div>
+        </div>
 
-        // Utility functions
-        function hideAllStates() {
-            emptyState.classList.add('hidden');
-            loadingState.classList.add('hidden');
-            errorState.classList.add('hidden');
-            resultsSection.classList.add('hidden');
+        <!-- Shopping Journey Summary -->
+        <div class="shopping-journey" id="shoppingJourney">
+            <div class="journey-header">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <h3>My Shopping Journey</h3>
+            </div>
+            <p class="journey-intro">I searched across multiple retailers to find you the best deal:</p>
+            <div class="journey-steps" id="journeySteps">
+                <!-- Journey steps will be inserted here -->
+            </div>
+            <div class="journey-conclusion">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <p id="journeyConclusion"></p>
+            </div>
+        </div>
+
+        <!-- Top Deal Card -->
+        <div class="top-deal-section" id="topDealSection">
+            <div class="section-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                Best Deal
+            </div>
+            <div class="deal-card top-deal" id="topDealCard">
+                <!-- Top deal will be inserted here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Alternative Offers -->
+        <div class="alternatives-section" id="alternativesSection">
+            <h3 class="section-title">More Options</h3>
+            <div class="deals-grid" id="dealsGrid">
+                <!-- Alternative deals will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p class="footer-text">
+        Prices are updated in real-time from multiple sources. Clicking "Buy" will take you directly to the retailer's website.
+        <a href="#" class="footer-link">Learn more</a>
+    </p>
+</footer>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Configuration
+    const API_BASE_URL = window.location.origin + '/deals/api';
+
+    // State management
+    let currentSearch = '';
+    let currentDeals = [];
+    let userLocation = null;
+
+    // DOM elements
+    const searchForm = document.getElementById('searchForm');
+    const productSearch = document.getElementById('productSearch');
+    const useLocationCheckbox = document.getElementById('useLocation');
+    const emptyState = document.getElementById('emptyState');
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
+    const resultsSection = document.getElementById('resultsSection');
+    const retryBtn = document.getElementById('retryBtn');
+    const exampleTags = document.querySelectorAll('.example-tag');
+
+    // Utility functions
+    function hideAllStates() {
+        emptyState.classList.add('hidden');
+        loadingState.classList.add('hidden');
+        errorState.classList.add('hidden');
+        resultsSection.classList.add('hidden');
+    }
+
+    function showState(state) {
+        hideAllStates();
+        state.classList.remove('hidden');
+    }
+
+    function formatPrice(price) {
+        return typeof price === 'number' ? price.toFixed(2) : '0.00';
+    }
+
+    function getPlaceholderImage(productName) {
+        const color = '6366F1';
+        const text = encodeURIComponent(productName.substring(0, 20));
+        return `https://via.placeholder.com/300x300/${color}/FFFFFF?text=${text}`;
+    }
+
+    // API calls
+    async function fetchDeals(productName) {
+        const requestData = {
+            product_name: productName,
+            use_location: useLocationCheckbox.checked,
+            max_results: 10
+        };
+
+        const response = await fetch(`${API_BASE_URL}/search`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to fetch deals');
         }
 
-        function showState(state) {
-            hideAllStates();
-            state.classList.remove('hidden');
-        }
+        return await response.json();
+    }
 
-        function formatPrice(price) {
-            return typeof price === 'number' ? price.toFixed(2) : '0.00';
-        }
-
-        function getPlaceholderImage(productName) {
-            const color = '6366F1';
-            const text = encodeURIComponent(productName.substring(0, 20));
-            return `https://via.placeholder.com/300x300/${color}/FFFFFF?text=${text}`;
-        }
-
-        // API calls
-        async function fetchDeals(productName) {
-            const requestData = {
-                product_name: productName,
-                use_location: useLocationCheckbox.checked,
-                max_results: 10
-            };
-
-            const response = await fetch(`${API_BASE_URL}/search`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData)
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to fetch deals');
+    async function fetchUserLocation() {
+        try {
+            const response = await fetch(`${API_BASE_URL}/location`);
+            if (response.ok) {
+                const data = await response.json();
+                userLocation = data.data;
+                return userLocation;
             }
-
-            return await response.json();
+        } catch (error) {
+            console.error('Error fetching location:', error);
         }
+        return null;
+    }
 
-        async function fetchUserLocation() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/location`);
-                if (response.ok) {
-                    const data = await response.json();
-                    userLocation = data.data;
-                    return userLocation;
+    // Update loading badges with actual source results
+    function updateLoadingBadges(sources) {
+        sources.forEach(source => {
+            const badge = document.querySelector(`[data-source="${source.name}"]`);
+            if (badge) {
+                badge.classList.remove('loading');
+                if (source.status === 'success' && source.count > 0) {
+                    badge.classList.add('complete');
+                    badge.textContent = `${capitalizeFirst(source.name.replace('_', ' '))} (${source.count})`;
+                } else if (source.status === 'error') {
+                    badge.classList.add('error');
                 }
-            } catch (error) {
-                console.error('Error fetching location:', error);
             }
-            return null;
-        }
+        });
+    }
 
-        // Update loading badges with actual source results
-        function updateLoadingBadges(sources) {
-            sources.forEach(source => {
-                const badge = document.querySelector(`[data-source="${source.name}"]`);
-                if (badge) {
-                    badge.classList.remove('loading');
-                    if (source.status === 'success' && source.count > 0) {
-                        badge.classList.add('complete');
-                        badge.textContent = `${capitalizeFirst(source.name.replace('_', ' '))} (${source.count})`;
-                    } else if (source.status === 'error') {
-                        badge.classList.add('error');
-                    }
-                }
-            });
-        }
+    function capitalizeFirst(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
 
-        function capitalizeFirst(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
+    // Create deal card HTML
+    function createDealCard(deal, isTopDeal = false) {
+        const savings = deal.original_price && deal.original_price > deal.price
+            ? (deal.original_price - deal.price).toFixed(2)
+            : null;
 
-        // Create deal card HTML
-        function createDealCard(deal, isTopDeal = false) {
-            const savings = deal.original_price && deal.original_price > deal.price
-                ? (deal.original_price - deal.price).toFixed(2)
-                : null;
+        const imageUrl = deal.image_url || getPlaceholderImage(deal.product_name);
+        const rating = deal.rating ? parseFloat(deal.rating).toFixed(1) : null;
+        const reviews = deal.reviews || 0;
 
-            const imageUrl = deal.image_url || getPlaceholderImage(deal.product_name);
-            const rating = deal.rating ? parseFloat(deal.rating).toFixed(1) : null;
-            const reviews = deal.reviews || 0;
-
-            return `
-                <div class="deal-content">
-                    <div class="deal-image-wrapper">
-                        <img src="${imageUrl}"
-                             alt="${deal.product_name}"
-                             class="deal-image"
-                             loading="lazy"
-                             onerror="this.src='${getPlaceholderImage(deal.product_name)}'">
-                        ${deal.on_sale ? '<span class="sale-badge">SALE</span>' : ''}
-                    </div>
-                    <div class="deal-info">
-                        <h3 class="deal-product-name">${deal.product_name}</h3>
-                        <div class="deal-seller">
-                            <span class="seller-name">${deal.seller}</span>
-                            ${rating ? `
-                                <div class="rating">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                                    </svg>
-                                    <span class="rating-value">${rating}</span>
-                                    ${reviews > 0 ? `<span class="rating-count">(${reviews.toLocaleString()})</span>` : ''}
-                                </div>
-                            ` : ''}
-                        </div>
-                        <div class="deal-pricing">
-                            <div class="price-wrapper">
-                                <span class="price">$${formatPrice(deal.price)}</span>
-                                ${savings ? `<span class="savings">Save $${savings}</span>` : ''}
-                            </div>
-                            ${deal.original_price && deal.original_price > deal.price ?
-                                `<p class="original-price">Was: $${formatPrice(deal.original_price)}</p>` : ''}
-                            <div class="shipping-info">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <rect x="1" y="3" width="15" height="13"></rect>
-                                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
-                                    <circle cx="5.5" cy="18.5" r="2.5"></circle>
-                                    <circle cx="18.5" cy="18.5" r="2.5"></circle>
+        return `
+            <div class="deal-content">
+                <div class="deal-image-wrapper">
+                    <img src="${imageUrl}"
+                         alt="${deal.product_name}"
+                         class="deal-image"
+                         loading="lazy"
+                         onerror="this.src='${getPlaceholderImage(deal.product_name)}'">
+                    ${deal.on_sale ? '<span class="sale-badge">SALE</span>' : ''}
+                </div>
+                <div class="deal-info">
+                    <h3 class="deal-product-name">${deal.product_name}</h3>
+                    <div class="deal-seller">
+                        <span class="seller-name">${deal.seller}</span>
+                        ${rating ? `
+                            <div class="rating">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                                 </svg>
-                                ${deal.shipping || 'Standard shipping'}
+                                <span class="rating-value">${rating}</span>
+                                ${reviews > 0 ? `<span class="rating-count">(${reviews.toLocaleString()})</span>` : ''}
                             </div>
-                            ${!deal.in_stock ? '<p class="stock-warning">Limited availability</p>' : ''}
-                        </div>
-                        ${deal.description ? `<p class="deal-description">${deal.description.substring(0, 120)}...</p>` : ''}
-                        <a href="${deal.url}"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="deal-btn"
-                           onclick="trackDealClick('${deal.seller}', '${deal.product_name}', ${deal.price})">
-                            Buy here for $${formatPrice(deal.price)}
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                <polyline points="15 3 21 3 21 9"></polyline>
-                                <line x1="10" y1="14" x2="21" y2="3"></line>
-                            </svg>
-                        </a>
+                        ` : ''}
                     </div>
+                    <div class="deal-pricing">
+                        <div class="price-wrapper">
+                            <span class="price">$${formatPrice(deal.price)}</span>
+                            ${savings ? `<span class="savings">Save $${savings}</span>` : ''}
+                        </div>
+                        ${deal.original_price && deal.original_price > deal.price ?
+                            `<p class="original-price">Was: $${formatPrice(deal.original_price)}</p>` : ''}
+                        <div class="shipping-info">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="1" y="3" width="15" height="13"></rect>
+                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                            </svg>
+                            ${deal.shipping || 'Standard shipping'}
+                        </div>
+                        ${!deal.in_stock ? '<p class="stock-warning">Limited availability</p>' : ''}
+                    </div>
+                    ${deal.description ? `<p class="deal-description">${deal.description.substring(0, 120)}...</p>` : ''}
+                    <a href="${deal.url}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="deal-btn"
+                       onclick="trackDealClick('${deal.seller}', '${deal.product_name}', ${deal.price})">
+                        Buy here for $${formatPrice(deal.price)}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
+    // Track deal clicks for analytics
+    function trackDealClick(seller, productName, price) {
+        console.log('Deal clicked:', { seller, productName, price });
+        // Add analytics tracking here (Google Analytics, etc.)
+    }
+
+    // Create shopping journey visualization
+    function createShoppingJourney(sources, allDeals, bestDeal) {
+        const journeySteps = document.getElementById('journeySteps');
+        const journeyConclusion = document.getElementById('journeyConclusion');
+
+        // Group deals by source/retailer
+        const dealsByRetailer = {};
+        allDeals.forEach(deal => {
+            const retailer = deal.seller;
+            if (!dealsByRetailer[retailer]) {
+                dealsByRetailer[retailer] = [];
+            }
+            dealsByRetailer[retailer].push(deal);
+        });
+
+        // Create journey steps
+        let stepsHTML = '';
+        const retailerNames = {
+            'google_shopping': 'Google Shopping',
+            'walmart': 'Walmart.com',
+            'target': 'Target.com',
+            'bestbuy': 'Best Buy',
+            'best_buy': 'Best Buy',
+            'amazon': 'Amazon',
+            'rapidapi_amazon': 'Amazon'
+        };
+
+        sources.forEach((source, index) => {
+            const retailerName = retailerNames[source.name] || capitalizeFirst(source.name.replace('_', ' '));
+            const retailerDeals = Object.values(dealsByRetailer).flat().filter(d =>
+                d.source === source.name || d.seller === retailerName
+            );
+
+            let stepClass = 'journey-step';
+            let stepIcon = '🔍';
+            let stepText = '';
+
+            if (source.status === 'success' && source.count > 0) {
+                stepClass += ' success';
+                stepIcon = '✓';
+
+                // Find cheapest at this retailer
+                if (retailerDeals.length > 0) {
+                    const cheapestHere = retailerDeals.reduce((min, deal) =>
+                        deal.price < min.price ? deal : min
+                    );
+                    stepText = `<strong>${retailerName}:</strong> Found ${source.count} options, cheapest at $${formatPrice(cheapestHere.price)}`;
+                } else {
+                    stepText = `<strong>${retailerName}:</strong> Found ${source.count} options`;
+                }
+            } else if (source.status === 'no_results') {
+                stepClass += ' no-results';
+                stepIcon = '○';
+                stepText = `<strong>${retailerName}:</strong> No results found`;
+            } else {
+                stepClass += ' error';
+                stepIcon = '✗';
+                stepText = `<strong>${retailerName}:</strong> Couldn't check (API unavailable)`;
+            }
+
+            stepsHTML += `
+                <div class="${stepClass}">
+                    <span class="step-icon">${stepIcon}</span>
+                    <p class="step-text">${stepText}</p>
                 </div>
             `;
+        });
+
+        journeySteps.innerHTML = stepsHTML;
+
+        // Create conclusion
+        const totalSearched = sources.filter(s => s.status === 'success' && s.count > 0).length;
+        const totalProducts = allDeals.length;
+
+        if (bestDeal) {
+            const savings = allDeals.length > 1 ?
+                (allDeals[1].price - bestDeal.price).toFixed(2) : 0;
+
+            const conclusionText = totalSearched > 1 ?
+                `After searching ${totalSearched} retailers and comparing ${totalProducts} products, <strong>${bestDeal.seller}</strong> has the best deal at <strong>$${formatPrice(bestDeal.price)}</strong>${savings > 0 ? `, saving you $${savings} compared to the next best option` : ''}!` :
+                `I found the best deal at <strong>${bestDeal.seller}</strong> for <strong>$${formatPrice(bestDeal.price)}</strong>!`;
+
+            journeyConclusion.innerHTML = conclusionText;
+        }
+    }
+
+    // Display results
+    function displayResults(responseData) {
+        const data = responseData.data;
+
+        if (!data || !data.all_deals || data.all_deals.length === 0) {
+            showError('No deals found for this product. Try a different search term or check back later.');
+            return;
         }
 
-        // Track deal clicks for analytics
-        function trackDealClick(seller, productName, price) {
-            console.log('Deal clicked:', { seller, productName, price });
-            // Add analytics tracking here (Google Analytics, etc.)
+        currentDeals = data.all_deals;
+
+        // Update search display
+        document.getElementById('searchedProduct').textContent = data.product_name;
+        document.getElementById('resultsCount').textContent =
+            `Found ${data.total_deals} ${data.total_deals === 1 ? 'deal' : 'deals'}`;
+
+        // Update location display
+        const locationEl = document.getElementById('resultsLocation');
+        if (data.location && data.location.city) {
+            locationEl.textContent = `📍 ${data.location.city}, ${data.location.region}`;
+            locationEl.style.display = 'block';
+        } else {
+            locationEl.style.display = 'none';
         }
 
-        // Create shopping journey visualization
-        function createShoppingJourney(sources, allDeals, bestDeal) {
-            const journeySteps = document.getElementById('journeySteps');
-            const journeyConclusion = document.getElementById('journeyConclusion');
-
-            // Group deals by source/retailer
-            const dealsByRetailer = {};
-            allDeals.forEach(deal => {
-                const retailer = deal.seller;
-                if (!dealsByRetailer[retailer]) {
-                    dealsByRetailer[retailer] = [];
-                }
-                dealsByRetailer[retailer].push(deal);
-            });
-
-            // Create journey steps
-            let stepsHTML = '';
-            const retailerNames = {
-                'google_shopping': 'Google Shopping',
-                'walmart': 'Walmart.com',
-                'target': 'Target.com',
-                'bestbuy': 'Best Buy',
-                'best_buy': 'Best Buy',
-                'amazon': 'Amazon',
-                'rapidapi_amazon': 'Amazon'
-            };
-
-            sources.forEach((source, index) => {
-                const retailerName = retailerNames[source.name] || capitalizeFirst(source.name.replace('_', ' '));
-                const retailerDeals = Object.values(dealsByRetailer).flat().filter(d =>
-                    d.source === source.name || d.seller === retailerName
-                );
-
-                let stepClass = 'journey-step';
-                let stepIcon = '🔍';
-                let stepText = '';
-
-                if (source.status === 'success' && source.count > 0) {
-                    stepClass += ' success';
-                    stepIcon = '✓';
-
-                    // Find cheapest at this retailer
-                    if (retailerDeals.length > 0) {
-                        const cheapestHere = retailerDeals.reduce((min, deal) =>
-                            deal.price < min.price ? deal : min
-                        );
-                        stepText = `<strong>${retailerName}:</strong> Found ${source.count} options, cheapest at $${formatPrice(cheapestHere.price)}`;
-                    } else {
-                        stepText = `<strong>${retailerName}:</strong> Found ${source.count} options`;
-                    }
-                } else if (source.status === 'no_results') {
-                    stepClass += ' no-results';
-                    stepIcon = '○';
-                    stepText = `<strong>${retailerName}:</strong> No results found`;
-                } else {
-                    stepClass += ' error';
-                    stepIcon = '✗';
-                    stepText = `<strong>${retailerName}:</strong> Couldn't check (API unavailable)`;
-                }
-
-                stepsHTML += `
-                    <div class="${stepClass}">
-                        <span class="step-icon">${stepIcon}</span>
-                        <p class="step-text">${stepText}</p>
-                    </div>
-                `;
-            });
-
-            journeySteps.innerHTML = stepsHTML;
-
-            // Create conclusion
-            const totalSearched = sources.filter(s => s.status === 'success' && s.count > 0).length;
-            const totalProducts = allDeals.length;
-
-            if (bestDeal) {
-                const savings = allDeals.length > 1 ?
-                    (allDeals[1].price - bestDeal.price).toFixed(2) : 0;
-
-                const conclusionText = totalSearched > 1 ?
-                    `After searching ${totalSearched} retailers and comparing ${totalProducts} products, <strong>${bestDeal.seller}</strong> has the best deal at <strong>$${formatPrice(bestDeal.price)}</strong>${savings > 0 ? `, saving you $${savings} compared to the next best option` : ''}!` :
-                    `I found the best deal at <strong>${bestDeal.seller}</strong> for <strong>$${formatPrice(bestDeal.price)}</strong>!`;
-
-                journeyConclusion.innerHTML = conclusionText;
-            }
+        // Update loading badges
+        if (data.sources) {
+            updateLoadingBadges(data.sources);
         }
 
-        // Display results
-        function displayResults(responseData) {
-            const data = responseData.data;
+        // Create shopping journey
+        if (data.sources && data.best_deal) {
+            createShoppingJourney(data.sources, currentDeals, data.best_deal);
+        }
 
-            if (!data || !data.all_deals || data.all_deals.length === 0) {
-                showError('No deals found for this product. Try a different search term or check back later.');
-                return;
-            }
+        // Display top deal
+        if (data.best_deal) {
+            const topDealCard = document.getElementById('topDealCard');
+            topDealCard.innerHTML = createDealCard(data.best_deal, true);
+            document.getElementById('topDealSection').style.display = 'block';
+        }
 
-            currentDeals = data.all_deals;
+        // Display alternative deals
+        const dealsGrid = document.getElementById('dealsGrid');
+        if (currentDeals.length > 1) {
+            dealsGrid.innerHTML = currentDeals.slice(1).map(deal =>
+                `<div class="deal-card">${createDealCard(deal, false)}</div>`
+            ).join('');
+            document.getElementById('alternativesSection').style.display = 'block';
+        } else {
+            document.getElementById('alternativesSection').style.display = 'none';
+        }
 
-            // Update search display
-            document.getElementById('searchedProduct').textContent = data.product_name;
-            document.getElementById('resultsCount').textContent =
-                `Found ${data.total_deals} ${data.total_deals === 1 ? 'deal' : 'deals'}`;
+        showState(resultsSection);
+    }
 
-            // Update location display
-            const locationEl = document.getElementById('resultsLocation');
-            if (data.location && data.location.city) {
-                locationEl.textContent = `📍 ${data.location.city}, ${data.location.region}`;
-                locationEl.style.display = 'block';
+    // Show error state
+    function showError(message) {
+        document.getElementById('errorMessage').textContent = message;
+        showState(errorState);
+    }
+
+    // Handle search
+    async function handleSearch(productName) {
+        if (!productName || productName.trim().length === 0) {
+            return;
+        }
+
+        currentSearch = productName.trim();
+
+        // Reset loading badges
+        document.querySelectorAll('.source-badge').forEach(badge => {
+            badge.classList.remove('complete', 'error');
+            badge.classList.add('loading');
+            // Reset text to original
+            const source = badge.getAttribute('data-source');
+            badge.textContent = capitalizeFirst(source.replace('_', ' '));
+        });
+
+        showState(loadingState);
+
+        try {
+            const responseData = await fetchDeals(currentSearch);
+
+            if (responseData.success) {
+                displayResults(responseData);
             } else {
-                locationEl.style.display = 'none';
+                showError(responseData.error || 'Unable to fetch deals at this time.');
             }
-
-            // Update loading badges
-            if (data.sources) {
-                updateLoadingBadges(data.sources);
-            }
-
-            // Create shopping journey
-            if (data.sources && data.best_deal) {
-                createShoppingJourney(data.sources, currentDeals, data.best_deal);
-            }
-
-            // Display top deal
-            if (data.best_deal) {
-                const topDealCard = document.getElementById('topDealCard');
-                topDealCard.innerHTML = createDealCard(data.best_deal, true);
-                document.getElementById('topDealSection').style.display = 'block';
-            }
-
-            // Display alternative deals
-            const dealsGrid = document.getElementById('dealsGrid');
-            if (currentDeals.length > 1) {
-                dealsGrid.innerHTML = currentDeals.slice(1).map(deal =>
-                    `<div class="deal-card">${createDealCard(deal, false)}</div>`
-                ).join('');
-                document.getElementById('alternativesSection').style.display = 'block';
-            } else {
-                document.getElementById('alternativesSection').style.display = 'none';
-            }
-
-            showState(resultsSection);
+        } catch (error) {
+            console.error('Error fetching deals:', error);
+            showError('Unable to fetch deals at this time. Please check your internet connection and try again.');
         }
+    }
 
-        // Show error state
-        function showError(message) {
-            document.getElementById('errorMessage').textContent = message;
-            showState(errorState);
+    // Event listeners
+    searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleSearch(productSearch.value);
+    });
+
+    retryBtn.addEventListener('click', () => {
+        if (currentSearch) {
+            handleSearch(currentSearch);
+        } else {
+            showState(emptyState);
         }
+    });
 
-        // Handle search
-        async function handleSearch(productName) {
-            if (!productName || productName.trim().length === 0) {
-                return;
-            }
+    // Example search tags
+    exampleTags.forEach(tag => {
+        tag.addEventListener('click', () => {
+            const searchTerm = tag.getAttribute('data-search');
+            productSearch.value = searchTerm;
+            handleSearch(searchTerm);
+        });
+    });
 
-            currentSearch = productName.trim();
+    // Fetch user location on page load if checkbox is checked
+    window.addEventListener('load', async () => {
+        productSearch.focus();
 
-            // Reset loading badges
-            document.querySelectorAll('.source-badge').forEach(badge => {
-                badge.classList.remove('complete', 'error');
-                badge.classList.add('loading');
-                // Reset text to original
-                const source = badge.getAttribute('data-source');
-                badge.textContent = capitalizeFirst(source.replace('_', ' '));
-            });
-
-            showState(loadingState);
-
-            try {
-                const responseData = await fetchDeals(currentSearch);
-
-                if (responseData.success) {
-                    displayResults(responseData);
-                } else {
-                    showError(responseData.error || 'Unable to fetch deals at this time.');
-                }
-            } catch (error) {
-                console.error('Error fetching deals:', error);
-                showError('Unable to fetch deals at this time. Please check your internet connection and try again.');
-            }
+        if (useLocationCheckbox.checked) {
+            await fetchUserLocation();
         }
+    });
 
-        // Event listeners
-        searchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            handleSearch(productSearch.value);
-        });
-
-        retryBtn.addEventListener('click', () => {
-            if (currentSearch) {
-                handleSearch(currentSearch);
-            } else {
-                showState(emptyState);
-            }
-        });
-
-        // Example search tags
-        exampleTags.forEach(tag => {
-            tag.addEventListener('click', () => {
-                const searchTerm = tag.getAttribute('data-search');
-                productSearch.value = searchTerm;
-                handleSearch(searchTerm);
-            });
-        });
-
-        // Fetch user location on page load if checkbox is checked
-        window.addEventListener('load', async () => {
-            productSearch.focus();
-
-            if (useLocationCheckbox.checked) {
-                await fetchUserLocation();
-            }
-        });
-
-        // Update location when checkbox changes
-        useLocationCheckbox.addEventListener('change', async (e) => {
-            if (e.target.checked && !userLocation) {
-                await fetchUserLocation();
-            }
-        });
-    </script>
-</body>
-</html>
+    // Update location when checkbox changes
+    useLocationCheckbox.addEventListener('change', async (e) => {
+        if (e.target.checked && !userLocation) {
+            await fetchUserLocation();
+        }
+    });
+</script>
+{% endblock %}

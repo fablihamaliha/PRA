@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Best Deals | Affordable vs Luxury{% endblock %}
+
+{% block extra_css %}
+<style>
+    .deals-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 48px;
+        margin-top: 48px;
+    }
+
+    .comparison-column {
+        background-color: #FFFFFF;
+        padding: 40px;
+        border-radius: 16px;
+        border: 1px solid #F0EDE8;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .column-header {
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 2px solid #F0EDE8;
+    }
+
+    .column-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 28px;
+        font-weight: 600;
+        color: #2C2421;
+        margin-bottom: 8px;
+    }
+
+    .column-subtitle {
+        font-size: 15px;
+        color: #6B6560;
+    }
+
+    .deal-product-card {
+        padding: 24px;
+        background-color: #FAF8F5;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: 1px solid #F0EDE8;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .deal-product-card:hover {
+        background-color: #FFFFFF;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(201, 168, 143, 0.12);
+    }
+
+    .product-checkbox {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 20px;
+        height: 20px;
+        accent-color: #C9A88F;
+        cursor: pointer;
+    }
+
+    .create-list-btn {
+        width: 100%;
+        margin-top: 40px;
+        padding: 18px 48px;
+        font-size: 16px;
+        font-weight: 500;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 28px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(201, 168, 143, 0.3);
+    }
+
+    .create-list-btn:hover {
+        background: linear-gradient(135deg, #B8977D 0%, #A88869 100%);
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(201, 168, 143, 0.4);
+    }
+
+    .create-list-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="deals-container">
+    <div class="results-header" style="text-align: center; margin-bottom: 64px;">
+        <h1 class="section-title">Choose Your Budget</h1>
+        <p class="section-subtitle">Select products from either category to create your shopping list</p>
+    </div>
+
+    <div class="comparison-grid">
+        <!-- Affordable Options -->
+        <div class="comparison-column">
+            <div class="column-header">
+                <h2 class="column-title">💰 Affordable Options</h2>
+                <p class="column-subtitle">Great products under $30</p>
+            </div>
+
+            {% if deals.affordable %}
+                {% for product in deals.affordable %}
+                <div class="deal-product-card">
+                    <input
+                        type="checkbox"
+                        class="product-checkbox"
+                        data-product-id="{{ product.id }}"
+                        data-is-affordable="true"
+                    >
+                    <h4 class="product-name">{{ product.name }}</h4>
+                    <p style="font-size: 14px; color: #6B6560; margin: 8px 0;">{{ product.brand }}</p>
+                    <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: #6B6560; text-align: center; padding: 40px 0;">No affordable options found</p>
+            {% endif %}
+        </div>
+
+        <!-- Luxury Options -->
+        <div class="comparison-column">
+            <div class="column-header">
+                <h2 class="column-title">✨ Luxury Options</h2>
+                <p class="column-subtitle">Premium products $100+</p>
+            </div>
+
+            {% if deals.luxury %}
+                {% for product in deals.luxury %}
+                <div class="deal-product-card">
+                    <input
+                        type="checkbox"
+                        class="product-checkbox"
+                        data-product-id="{{ product.id }}"
+                        data-is-affordable="false"
+                    >
+                    <h4 class="product-name">{{ product.name }}</h4>
+                    <p style="font-size: 14px; color: #6B6560; margin: 8px 0;">{{ product.brand }}</p>
+                    <p class="product-price">${{ "%.2f"|format(product.price) }}</p>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="color: #6B6560; text-align: center; padding: 40px 0;">No luxury options found</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <button class="create-list-btn" id="createListBtn" onclick="createShoppingList()">
+        Create Shopping List
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const sessionId = '{{ session_id }}';
+
+    async function createShoppingList() {
+        const selectedProducts = Array.from(document.querySelectorAll('.product-checkbox:checked'))
+            .map(cb => ({
+                product_id: parseInt(cb.dataset.productId),
+                is_affordable: cb.dataset.isAffordable === 'true'
+            }));
+
+        if (selectedProducts.length === 0) {
+            alert('Please select at least one product');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/create-shopping-list', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    products: selectedProducts,
+                    name: 'My Skincare Shopping List'
+                })
+            });
+
+            if (response.status === 401) {
+                window.location.href = '/auth?next=' + encodeURIComponent(window.location.pathname);
+                return;
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                window.location.href = `/shopping-list/${data.shopping_list_id}`;
+            } else {
+                throw new Error(data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to create shopping list. Please try again.');
+        }
+    }
+</script>
+{% endblock %}

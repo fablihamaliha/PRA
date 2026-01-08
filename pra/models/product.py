@@ -38,6 +38,9 @@ class Product(db.Model):
 
     # Relationships
     recommendation_items = db.relationship('RecommendationItem', back_populates='product')
+    routine_products = db.relationship('RoutineProduct', back_populates='product')
+    shopping_list_items = db.relationship('ShoppingListItem', back_populates='product')
+    product_comments = db.relationship('ProductComment', back_populates='product', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<Product {self.brand} - {self.name}>'

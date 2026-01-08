@@ -14,6 +14,12 @@ def deals_page():
     return render_template('deal_finder.html')
 
 
+@deals_bp.route('/todays-deals')
+def todays_deals():
+    """Render today's deals page with current sales"""
+    return render_template('todays_deals.html')
+
+
 @deals_bp.route('/api/search', methods=['POST'])
 def search_deals():
     """

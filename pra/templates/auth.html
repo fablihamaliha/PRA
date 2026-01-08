@@ -11,8 +11,8 @@
     <!-- Welcome Screen -->
     <div class="welcome-screen" id="welcomeScreen">
         <div class="welcome-content">
-            <h1 class="welcome-title">Welcome to PRA</h1>
-            <p class="welcome-subtitle">Your personalized shopping and skincare companion</p>
+            <h1 class="welcome-title">Welcome to SkinRoutine</h1>
+            <p class="welcome-subtitle">Your personal skincare concierge</p>
 
             <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 32px;">
                 <button class="btn btn-primary btn-large" id="openSignInModal" aria-label="Sign in to your account">
@@ -242,6 +242,11 @@
     </div>
 
     <script>
+        // Check URL parameters for redirect and action
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectAfterLogin = urlParams.get('next');
+        const action = urlParams.get('action');
+
         // Modal functionality
         const modal = document.getElementById('modalOverlay');
         const openSignInBtn = document.getElementById('openSignInModal');
@@ -338,6 +343,37 @@
             });
         }
 
+        // Save routine after login/signup
+        async function saveRoutineAfterLogin(sessionId) {
+            try {
+                const response = await fetch('/api/save-routine', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('loginSuccess', 'Routine saved successfully! Redirecting...', false);
+                    setTimeout(() => {
+                        window.location.href = redirectAfterLogin;
+                    }, 1500);
+                } else {
+                    showAlert('loginError', 'Failed to save routine. Please try again from your routine page.');
+                    setTimeout(() => {
+                        window.location.href = redirectAfterLogin;
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Error saving routine:', error);
+                showAlert('loginError', 'Error saving routine. Redirecting...');
+                setTimeout(() => {
+                    window.location.href = redirectAfterLogin;
+                }, 2000);
+            }
+        }
+
         // Login form submission
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -363,9 +399,16 @@
 
                 if (response.ok && data.success) {
                     showAlert('loginSuccess', data.message || 'Login successful! Redirecting...', false);
-                    setTimeout(() => {
-                        window.location.href = data.redirect || '/deals';
-                    }, 1500);
+
+                    // Handle post-login routine save
+                    if (redirectAfterLogin && action === 'save') {
+                        const sessionId = redirectAfterLogin.split('/').pop();
+                        await saveRoutineAfterLogin(sessionId);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = redirectAfterLogin || data.redirect || '/deals';
+                        }, 1500);
+                    }
                 } else {
                     showAlert('loginError', data.error || 'Login failed. Please try again.');
                 }
@@ -412,9 +455,16 @@
 
                 if (response.ok && data.success) {
                     showAlert('signupSuccess', data.message || 'Account created successfully! Redirecting...', false);
-                    setTimeout(() => {
-                        window.location.href = data.redirect || '/deals';
-                    }, 1500);
+
+                    // Handle post-signup routine save
+                    if (redirectAfterLogin && action === 'save') {
+                        const sessionId = redirectAfterLogin.split('/').pop();
+                        await saveRoutineAfterLogin(sessionId);
+                    } else {
+                        setTimeout(() => {
+                            window.location.href = redirectAfterLogin || data.redirect || '/deals';
+                        }, 1500);
+                    }
                 } else {
                     showAlert('signupError', data.error || 'Signup failed. Please try again.');
                 }

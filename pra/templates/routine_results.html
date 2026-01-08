@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Your Personalized Routine{% endblock %}
+
+{% block extra_css %}
+<style>
+    .results-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .results-header {
+        text-align: center;
+        margin-bottom: 64px;
+    }
+
+    .skin-type-badge {
+        display: inline-block;
+        padding: 8px 20px;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: 20px;
+        margin-bottom: 16px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin-top: 40px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="results-container">
+    <div class="results-header">
+        <span class="skin-type-badge">{{ skin_type|title }} Skin</span>
+        <h1 class="section-title">Your Personalized Routine</h1>
+        <p class="section-subtitle">Tailored specifically for your {{ skin_type }} skin{% if concerns %} targeting {{ concerns|join(', ') }}{% endif %}</p>
+    </div>
+
+    <div class="routine-grid">
+        <!-- AM Routine -->
+        <div class="routine-column">
+            <h3 class="routine-label">☀️ Morning Routine</h3>
+            {% for step in routine.AM %}
+            <div class="product-card">
+                <h4 class="product-name">{{ step.step_name if step.step_name else step.name }}</h4>
+                <p class="product-reason">{{ step.why_this_matters if step.why_this_matters else step.why }}</p>
+                {% if step.what_to_look_for %}
+                    <p class="product-reason"><strong>Look for:</strong> {{ step.what_to_look_for|join(', ') }}</p>
+                {% endif %}
+                {% if step.what_to_avoid %}
+                    <p class="product-reason"><strong>Avoid:</strong> {{ step.what_to_avoid|join(', ') }}</p>
+                {% endif %}
+                <a class="btn-outline" href="/routine-step-deals/{{ session_id }}/AM/{{ step.order if step.order else loop.index }}">View Products</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- PM Routine -->
+        <div class="routine-column">
+            <h3 class="routine-label">🌙 Evening Routine</h3>
+            {% for step in routine.PM %}
+            <div class="product-card">
+                <h4 class="product-name">{{ step.step_name if step.step_name else step.name }}</h4>
+                <p class="product-reason">{{ step.why_this_matters if step.why_this_matters else step.why }}</p>
+                {% if step.what_to_look_for %}
+                    <p class="product-reason"><strong>Look for:</strong> {{ step.what_to_look_for|join(', ') }}</p>
+                {% endif %}
+                {% if step.what_to_avoid %}
+                    <p class="product-reason"><strong>Avoid:</strong> {{ step.what_to_avoid|join(', ') }}</p>
+                {% endif %}
+                <a class="btn-outline" href="/routine-step-deals/{{ session_id }}/PM/{{ step.order if step.order else loop.index }}">View Products</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="btn-secondary" onclick="saveRoutine()">Save Routine</button>
+        <button class="btn-outline" onclick="updateRoutine()">Update Routine</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const sessionId = '{{ session_id }}';
+
+    async function saveRoutine() {
+        try {
+            // Check if we need to update existing routine
+            const updateExisting = sessionStorage.getItem('update_existing') === 'true';
+            const existingRoutineId = sessionStorage.getItem('existing_routine_id');
+
+            const payload = { session_id: sessionId };
+            if (updateExisting && existingRoutineId) {
+                payload.update_existing = true;
+                payload.existing_routine_id = parseInt(existingRoutineId);
+            }
+
+            const response = await fetch('/api/save-routine', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.status === 401) {
+                // User not authenticated - redirect to login with return URL
+                window.location.href = data.redirect;
+                return;
+            }
+
+            if (data.success) {
+                // Clear session storage
+                sessionStorage.removeItem('update_existing');
+                sessionStorage.removeItem('existing_routine_id');
+                alert(data.message || 'Routine saved successfully!');
+            } else {
+                throw new Error(data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to save routine. Please try again.');
+        }
+    }
+
+    function updateRoutine() {
+        // Redirect to build-routine page in update mode
+        window.location.href = '/build-routine?update=true';
+    }
+</script>
+{% endblock %}

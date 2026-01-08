@@ -112,6 +112,34 @@ function setupEventListeners() {
     preferencesModal?.addEventListener('click', (e) => {
         if (e.target === preferencesModal) closePreferencesModal();
     });
+
+    // Mobile menu
+    const menuToggle = document.querySelector('.menu-toggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+    const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+    const openMenu = () => {
+        document.body.classList.add('menu-open');
+        mobileMenu?.setAttribute('aria-hidden', 'false');
+    };
+
+    const closeMenu = () => {
+        document.body.classList.remove('menu-open');
+        mobileMenu?.setAttribute('aria-hidden', 'true');
+    };
+
+    menuToggle?.addEventListener('click', openMenu);
+    mobileMenuClose?.addEventListener('click', closeMenu);
+    mobileMenuOverlay?.addEventListener('click', closeMenu);
+
+    mobileMenu?.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', closeMenu);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeMenu();
+    });
 }
 
 // Modal functions

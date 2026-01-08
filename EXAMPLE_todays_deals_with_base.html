@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Today's Deals | SkinRoutine{% endblock %}
+
+{% block extra_css %}
+<style>
+    .deals-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 80px 24px 60px;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    .page-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 44px;
+        font-weight: 600;
+        color: #2C2421;
+        margin-bottom: 16px;
+    }
+
+    .page-subtitle {
+        font-size: 17px;
+        color: #6B6560;
+        line-height: 1.6;
+    }
+
+    .refresh-banner {
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        padding: 16px 24px;
+        border-radius: 12px;
+        margin-bottom: 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #FFFFFF;
+    }
+
+    /* ... rest of your page-specific styles ... */
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Main Content -->
+<div class="deals-container">
+    <div class="page-header">
+        <h1 class="page-title">Today's Deals</h1>
+        <p class="page-subtitle">Daily beauty steals from top retailers like Ulta, Sephora, and Amazon</p>
+        <span class="coming-soon-badge">Live Scraping Coming Soon</span>
+    </div>
+
+    <!-- Refresh Banner -->
+    <div class="refresh-banner">
+        <div class="refresh-info">
+            <strong>Updated:</strong> Every 6 hours
+            <span style="margin-left: 16px;">🔥 <strong>{{ sample_deals|length if sample_deals else 0 }}</strong> active deals</span>
+        </div>
+        <button class="refresh-btn" onclick="refreshDeals()">Refresh Now</button>
+    </div>
+
+    <!-- Filters and Deals Grid -->
+    <!-- ... rest of your page content ... -->
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function refreshDeals() {
+        // Your page-specific JavaScript
+        const spinner = document.createElement('div');
+        spinner.className = 'loading-spinner';
+        spinner.innerHTML = '<div class="spinner"></div><p style="color: #6B6560;">Refreshing deals...</p>';
+
+        const grid = document.getElementById('dealsGrid');
+        grid.innerHTML = '';
+        grid.appendChild(spinner);
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+    }
+
+    function filterDeals() {
+        // Filter logic
+        const retailer = document.getElementById('retailerFilter').value;
+        const category = document.getElementById('categoryFilter').value;
+        const discount = document.getElementById('discountFilter').value;
+
+        console.log('Filters:', { retailer, category, discount });
+    }
+</script>
+{% endblock %}

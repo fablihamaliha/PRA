@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}{{ step.step_name }} Deals{% endblock %}
+
+{% block extra_css %}
+<style>
+    .deals-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .step-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    .step-title {
+        font-family: 'Fraunces', 'Georgia', serif;
+        font-size: 36px;
+        color: #1A1A1A;
+        margin-bottom: 10px;
+    }
+
+    .step-subtitle {
+        color: #6B6560;
+        font-size: 16px;
+    }
+
+    .step-details {
+        display: grid;
+        gap: 12px;
+        max-width: 800px;
+        margin: 24px auto 0;
+        color: #6B6560;
+    }
+
+    .deals-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+        margin-top: 40px;
+    }
+
+    .deal-column {
+        background-color: #FFFFFF;
+        border-radius: 16px;
+        border: 1px solid #F0EDE8;
+        padding: 28px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .deal-title {
+        font-size: 20px;
+        color: #1A1A1A;
+        margin-bottom: 6px;
+    }
+
+    .deal-subtitle {
+        color: #6B6560;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+
+    .deal-card {
+        padding: 18px;
+        border-radius: 12px;
+        background-color: #FAF8F5;
+        border: 1px solid #F0EDE8;
+        margin-bottom: 14px;
+    }
+
+    .deal-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .deal-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        color: #6B6560;
+        margin-top: 6px;
+    }
+
+    .deal-link {
+        display: inline-block;
+        margin-top: 12px;
+        color: #8F5E49;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .deal-link:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+        .deals-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="deals-container">
+    <div class="step-header">
+        <h1 class="step-title">{{ step.step_name if step.step_name else step.name }} Picks</h1>
+        <p class="step-subtitle">Best-rated {{ (step.step_name if step.step_name else step.name)|lower }} options for {{ skin_type }} skin{% if concerns %} with {{ concerns|join(', ') }}{% endif %}</p>
+        <div class="step-details">
+            <div><strong>Why it matters:</strong> {{ step.why_this_matters if step.why_this_matters else step.why }}</div>
+            {% if step.what_to_look_for %}
+                <div><strong>Look for:</strong> {{ step.what_to_look_for|join(', ') }}</div>
+            {% endif %}
+            {% if step.what_to_avoid %}
+                <div><strong>Avoid:</strong> {{ step.what_to_avoid|join(', ') }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="deals-grid">
+        <div class="deal-column">
+            <h2 class="deal-title">Budget-Friendly</h2>
+            <p class="deal-subtitle">Strong picks under $30.</p>
+            {% if deals.affordable %}
+                {% for product in deals.affordable %}
+                <div class="deal-card">
+                    <div class="product-name">{{ product.name }}</div>
+                    <div class="deal-meta">
+                        <span>{{ product.brand }}</span>
+                        <span>${{ "%.2f"|format(product.price or 0) }}</span>
+                    </div>
+                    <div class="deal-meta">
+                        <span>Rating: {{ product.rating or "N/A" }}</span>
+                        <span>{{ product.num_reviews or 0 }} reviews</span>
+                    </div>
+                    {% if product.ingredients %}
+                        <div class="deal-meta">Ingredients: {{ product.ingredients|join(', ') }}</div>
+                    {% endif %}
+                    <div class="deal-meta">
+                        <span>Retailer: {{ product.source|title }}</span>
+                    </div>
+                    {% if product.url %}
+                        <a class="deal-link" href="{{ product.url }}" target="_blank" rel="noopener">View retailer →</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="deal-subtitle">No budget picks found yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="deal-column">
+            <h2 class="deal-title">Luxury</h2>
+            <p class="deal-subtitle">Premium options $100+.</p>
+            {% if deals.luxury %}
+                {% for product in deals.luxury %}
+                <div class="deal-card">
+                    <div class="product-name">{{ product.name }}</div>
+                    <div class="deal-meta">
+                        <span>{{ product.brand }}</span>
+                        <span>${{ "%.2f"|format(product.price or 0) }}</span>
+                    </div>
+                    <div class="deal-meta">
+                        <span>Rating: {{ product.rating or "N/A" }}</span>
+                        <span>{{ product.num_reviews or 0 }} reviews</span>
+                    </div>
+                    {% if product.ingredients %}
+                        <div class="deal-meta">Ingredients: {{ product.ingredients|join(', ') }}</div>
+                    {% endif %}
+                    <div class="deal-meta">
+                        <span>Retailer: {{ product.source|title }}</span>
+                    </div>
+                    {% if product.url %}
+                        <a class="deal-link" href="{{ product.url }}" target="_blank" rel="noopener">View retailer →</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="deal-subtitle">No luxury picks found yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

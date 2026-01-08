@@ -7,6 +7,9 @@ Flask-Login==0.6.3
 # HTTP requests for API calls
 requests==2.31.0
 
+# Web scraping
+beautifulsoup4==4.12.2
+
 # OpenAI GPT integration
 openai==1.54.0
 

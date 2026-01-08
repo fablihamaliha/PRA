@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}{{ shopping_list.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .list-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .list-header {
+        background-color: #FFFFFF;
+        padding: 40px;
+        border-radius: 16px;
+        margin-bottom: 32px;
+        border: 1px solid #F0EDE8;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .list-title {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 36px;
+        font-weight: 600;
+        color: #2C2421;
+        margin-bottom: 16px;
+    }
+
+    .list-meta {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        font-size: 15px;
+        color: #6B6560;
+    }
+
+    .total-price {
+        font-size: 24px;
+        font-weight: 600;
+        color: #C9A88F;
+    }
+
+    .shopping-item {
+        background-color: #FFFFFF;
+        padding: 28px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: 1px solid #F0EDE8;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .shopping-item:hover {
+        box-shadow: 0 4px 12px rgba(201, 168, 143, 0.12);
+    }
+
+    .shopping-item.purchased {
+        opacity: 0.6;
+        background-color: #FAF8F5;
+    }
+
+    .item-checkbox {
+        width: 24px;
+        height: 24px;
+        accent-color: #C9A88F;
+        cursor: pointer;
+    }
+
+    .item-details {
+        flex: 1;
+    }
+
+    .item-name {
+        font-size: 18px;
+        font-weight: 500;
+        color: #1A1A1A;
+        margin-bottom: 4px;
+    }
+
+    .item-brand {
+        font-size: 14px;
+        color: #6B6560;
+        margin-bottom: 8px;
+    }
+
+    .item-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        background-color: #F8F7F4;
+        color: #6B6560;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 12px;
+        border: 1px solid #E8E4DF;
+    }
+
+    .item-badge.affordable {
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        border: none;
+    }
+
+    .item-price {
+        font-size: 20px;
+        font-weight: 600;
+        color: #C9A88F;
+    }
+
+    .item-link {
+        padding: 10px 24px;
+        background-color: #F8F7F4;
+        color: #3D3D3D;
+        text-decoration: none;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 1px solid #E8E4DF;
+    }
+
+    .item-link:hover {
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        border-color: #C9A88F;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        color: #6B6560;
+    }
+
+    .empty-state h2 {
+        font-family: 'Cormorant Garamond', Georgia, serif;
+        font-size: 32px;
+        color: #2C2421;
+        margin-bottom: 16px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <div class="list-header">
+        <h1 class="list-title">{{ shopping_list.name }}</h1>
+        <div class="list-meta">
+            <span>{{ shopping_list.shopping_list_items|length }} items</span>
+            <span>•</span>
+            <span class="total-price">${{ "%.2f"|format(shopping_list.to_dict().total_price) }} total</span>
+        </div>
+    </div>
+
+    {% if shopping_list.shopping_list_items %}
+        {% for item in shopping_list.shopping_list_items %}
+        <div class="shopping-item {% if item.is_purchased %}purchased{% endif %}">
+            <input
+                type="checkbox"
+                class="item-checkbox"
+                {% if item.is_purchased %}checked{% endif %}
+                onchange="togglePurchased({{ item.id }}, this.checked)"
+            >
+            <div class="item-details">
+                <h3 class="item-name">{{ item.product.name }}</h3>
+                <p class="item-brand">{{ item.product.brand }}</p>
+                <span class="item-badge {% if item.is_affordable_option %}affordable{% endif %}">
+                    {% if item.is_affordable_option %}Affordable{% else %}Luxury{% endif %}
+                </span>
+            </div>
+            <div class="item-price">${{ "%.2f"|format(item.product.price) }}</div>
+            {% if item.product.url %}
+            <a href="{{ item.product.url }}" target="_blank" class="item-link">Buy Now</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <h2>Your shopping list is empty</h2>
+            <p>Start building a routine to add products to your list</p>
+            <a href="/build-routine" class="btn-primary" style="margin-top: 24px; display: inline-block;">Build Routine</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function togglePurchased(itemId, isPurchased) {
+        try {
+            const response = await fetch(`/api/toggle-purchased/${itemId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error);
+            }
+
+            // Update UI
+            const item = event.target.closest('.shopping-item');
+            if (isPurchased) {
+                item.classList.add('purchased');
+            } else {
+                item.classList.remove('purchased');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to update item status');
+            event.target.checked = !isPurchased;
+        }
+    }
+</script>
+{% endblock %}

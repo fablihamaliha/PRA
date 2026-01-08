@@ -11,8 +11,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"  # Commented out - not needed, DB is internal to Docker
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U prra_user -d prra_db"]
       interval: 10s
@@ -35,8 +35,8 @@ services:
       DATABASE_URL: postgresql://prra_user:${DB_PASSWORD:-changeme}@postgres:5432/prra_db
 
       # Flask
-      FLASK_ENV: ${FLASK_ENV:-production}
-      FLASK_DEBUG: ${FLASK_DEBUG:-False}
+      FLASK_ENV: ${FLASK_ENV:-development}
+      FLASK_DEBUG: ${FLASK_DEBUG:-True}
       SECRET_KEY: ${SECRET_KEY:-change-this-in-production}
 
       # API Keys (optional)
@@ -51,6 +51,7 @@ services:
       - "5001:5001"
     volumes:
       - ./logs:/app/logs
+      - ./pra:/app/pra  # Mount your code for live editing
     networks:
       - pra-network
     restart: unless-stopped
