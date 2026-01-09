@@ -2,6 +2,14 @@
 .env
 .env.local
 .env.docker
+.env.example
+
+# Public-facing files (keep private for security)
+README.md
+SECURITY.md
+LICENSE
+CONTRIBUTING.md
+docker-compose.yml
 
 # Sensitive Documentation (Internal Only)
 *_SETUP.md
