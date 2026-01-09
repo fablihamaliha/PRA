@@ -9,6 +9,10 @@ class User(UserMixin, db.Model):
     # Add this to the User model relationships:
     shopping_lists = db.relationship('ShoppingList', back_populates='user', cascade='all, delete-orphan')
     routines = db.relationship('Routine', back_populates='user', cascade='all, delete-orphan')
+    visitor_logs = db.relationship('VisitorLog', back_populates='user', cascade='all, delete-orphan')
+    security_events = db.relationship('SecurityEvent', back_populates='user', cascade='all, delete-orphan')
+    analytics_events = db.relationship('AnalyticsEvent', back_populates='user', cascade='all, delete-orphan')
+    saved_routines = db.relationship('SavedRoutine', back_populates='user', cascade='all, delete-orphan')
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
@@ -22,7 +26,6 @@ class User(UserMixin, db.Model):
     recommendation_sessions = db.relationship('RecommendationSession', back_populates='user',
                                               cascade='all, delete-orphan')
     product_comments = db.relationship('ProductComment', back_populates='user', cascade='all, delete-orphan')
-    saved_routines = db.relationship('SavedRoutine', back_populates='user', cascade='all, delete-orphan')
 
     def set_password(self, password):
         """Hash and set the user's password"""

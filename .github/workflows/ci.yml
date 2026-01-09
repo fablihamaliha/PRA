@@ -1,5 +1,5 @@
 # CI/CD Pipeline - Continuous Integration
-# Runs on every push and pull request
+# SECURITY: Only runs for the repository owner to prevent unauthorized use in forks
 
 name: CI - Build & Test
 
@@ -10,10 +10,31 @@ on:
     branches: [ master, main ]
 
 jobs:
+  # Security: Verify repository ownership
+  verify-owner:
+    name: Verify Repository Owner
+    runs-on: ubuntu-latest
+    outputs:
+      is-owner: ${{ steps.check.outputs.is-owner }}
+    steps:
+      - name: Check if repository owner
+        id: check
+        run: |
+          if [ "${{ github.repository_owner }}" = "fablihamaliha" ]; then
+            echo "is-owner=true" >> $GITHUB_OUTPUT
+            echo "✅ Authorized: Repository owner verified"
+          else
+            echo "is-owner=false" >> $GITHUB_OUTPUT
+            echo "❌ Unauthorized: This workflow only runs for the original repository owner"
+            exit 1
+          fi
+
   # Job 1: Test Python Code
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    needs: verify-owner
+    if: needs.verify-owner.outputs.is-owner == 'true'
 
     services:
       postgres:
@@ -77,7 +98,8 @@ jobs:
   build:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    needs: test
+    needs: [verify-owner, test]
+    if: needs.verify-owner.outputs.is-owner == 'true'
     permissions:
       contents: read
       packages: write
@@ -122,6 +144,8 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    needs: verify-owner
+    if: needs.verify-owner.outputs.is-owner == 'true'
 
     steps:
       - name: Checkout code

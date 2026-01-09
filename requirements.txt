@@ -7,6 +7,9 @@ Flask-Login==0.6.3
 # HTTP requests for API calls
 requests==2.31.0
 
+# Analytics and user agent parsing
+user-agents==2.2.0
+
 # Web scraping
 beautifulsoup4==4.12.2
 

@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, jsonify, render_template, request, session
+from flask import Flask, send_from_directory, jsonify, render_template, request, session, redirect, url_for
 from flask_cors import CORS
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from pra.config import Config
@@ -57,18 +57,23 @@ def create_app(config_class=Config):
     from pra.blueprints.skincare import skincare_bp
     from pra.blueprints.deals import deals_bp
     from pra.blueprints.community import community_bp
+    from pra.routes.analytics_routes import analytics_bp
 
     # Register blueprints
     app.register_blueprint(skincare_bp, url_prefix='/skincare')
     app.register_blueprint(deals_bp, url_prefix='/deals')
     app.register_blueprint(community_bp, url_prefix='/community')
     app.register_blueprint(routine_builder_bp)
+    app.register_blueprint(analytics_bp)
+
+    from pra.middleware.analytics_middleware import AnalyticsMiddleware
+    AnalyticsMiddleware(app)
 
     # Create tables
     with app.app_context():
         try:
             # Import models here to ensure they're registered
-            from pra.models import user, skin_profile, product, recommendation, routine, community
+            from pra.models import user, skin_profile, product, recommendation, routine, community, analytics
             db.create_all()
             logger.info("Database tables created successfully")
 
@@ -92,7 +97,71 @@ def create_app(config_class=Config):
     @app.route('/')
     def index():
         """Main landing page with deals, auth, and recommendations"""
+        # If user is logged in, redirect to dashboard
+        if current_user.is_authenticated:
+            if current_user.email.endswith('@admin.com'):
+                return redirect(url_for('analytics.dashboard'))
+            return redirect(url_for('dashboard'))
         return render_template('index.html')
+
+    @app.route('/dashboard')
+    @login_required
+    def dashboard():
+        """User dashboard - shows routine, wardrobe, shopping lists"""
+        from pra.models.routine import SavedRoutine, ShoppingList
+        from pra.models.product import Wardrobe
+        from datetime import datetime
+        import json
+
+        # Get user's stats
+        routine = SavedRoutine.query.filter_by(
+            user_id=current_user.id,
+            is_active=True
+        ).order_by(SavedRoutine.updated_at.desc()).first()
+
+        wardrobe_count = Wardrobe.query.filter_by(user_id=current_user.id).count()
+        shopping_lists = ShoppingList.query.filter_by(user_id=current_user.id).all()
+        shopping_list_count = sum(len(sl.shopping_list_items) for sl in shopping_lists)
+
+        # Calculate estimated savings (placeholder)
+        estimated_savings = 0.0
+
+        stats = {
+            'routine_count': 1 if routine else 0,
+            'wardrobe_count': wardrobe_count,
+            'shopping_list_count': shopping_list_count,
+            'estimated_savings': estimated_savings
+        }
+
+        # Prepare routine data if exists
+        routine_data = None
+        if routine:
+            routine_json = json.loads(routine.routine_data)
+            am_steps = len(routine_json.get('AM', []))
+            pm_steps = len(routine_json.get('PM', []))
+
+            # Calculate time ago
+            time_diff = datetime.utcnow() - routine.updated_at
+            if time_diff.days == 0:
+                updated_ago = "today"
+            elif time_diff.days == 1:
+                updated_ago = "yesterday"
+            else:
+                updated_ago = f"{time_diff.days} days ago"
+
+            routine_data = {
+                'skin_type': routine.skin_type,
+                'concerns': json.loads(routine.concerns),
+                'am_steps': am_steps,
+                'pm_steps': pm_steps,
+                'updated_ago': updated_ago,
+                'session_id': routine.session_id
+            }
+
+        return render_template('dashboard.html',
+                             user=current_user,
+                             stats=stats,
+                             routine=routine_data)
 
     @app.route('/test')
     def test_page():
@@ -150,10 +219,14 @@ def create_app(config_class=Config):
             session.permanent = True
             logger.info(f"User logged in: {user.email}")
 
+            redirect_url = '/'
+            if user.email.endswith('@admin.com'):
+                redirect_url = '/analytics/dashboard'
+
             return jsonify({
                 'success': True,
                 'message': f'Welcome back, {user.name}!',
-                'redirect': '/',
+                'redirect': redirect_url,
                 'user': user.to_dict()
             }), 200
 
@@ -261,6 +334,316 @@ def create_app(config_class=Config):
         return jsonify({
             'authenticated': False
         }), 200
+
+    @app.route('/wardrobe')
+    @login_required
+    def wardrobe():
+        """User's product wardrobe/collection"""
+        from pra.models.product import Wardrobe
+
+        products = Wardrobe.query.filter_by(user_id=current_user.id).order_by(Wardrobe.created_at.desc()).all()
+
+        # Count by status
+        own_count = sum(1 for p in products if p.status == 'own')
+        want_count = sum(1 for p in products if p.status == 'want_to_try')
+        used_count = sum(1 for p in products if p.status == 'used_to_own')
+
+        return render_template('wardrobe.html',
+                             products=products,
+                             total_count=len(products),
+                             own_count=own_count,
+                             want_count=want_count,
+                             used_count=used_count)
+
+    @app.route('/api/wardrobe', methods=['POST'])
+    @login_required
+    def add_to_wardrobe():
+        """Add product to user's wardrobe"""
+        from pra.models.product import Wardrobe
+
+        try:
+            data = request.get_json()
+
+            wardrobe_item = Wardrobe(
+                user_id=current_user.id,
+                product_name=data.get('product_name'),
+                brand=data.get('brand'),
+                category=data.get('category'),
+                status=data.get('status', 'want_to_try'),
+                price=data.get('price'),
+                url=data.get('url'),
+                image_url=data.get('image_url'),
+                user_rating=data.get('user_rating'),
+                notes=data.get('notes')
+            )
+
+            db.session.add(wardrobe_item)
+            db.session.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'Product added to wardrobe',
+                'product': wardrobe_item.to_dict()
+            }), 201
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error adding to wardrobe: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to add product'
+            }), 500
+
+    @app.route('/api/wardrobe/<int:item_id>', methods=['GET'])
+    @login_required
+    def get_wardrobe_item(item_id):
+        """Get single wardrobe item"""
+        from pra.models.product import Wardrobe
+
+        item = Wardrobe.query.filter_by(id=item_id, user_id=current_user.id).first()
+
+        if not item:
+            return jsonify({'success': False, 'error': 'Item not found'}), 404
+
+        return jsonify({
+            'success': True,
+            'product': item.to_dict()
+        }), 200
+
+    @app.route('/api/wardrobe/<int:item_id>', methods=['PUT'])
+    @login_required
+    def update_wardrobe_item(item_id):
+        """Update wardrobe item"""
+        from pra.models.product import Wardrobe
+
+        try:
+            item = Wardrobe.query.filter_by(id=item_id, user_id=current_user.id).first()
+
+            if not item:
+                return jsonify({'success': False, 'error': 'Item not found'}), 404
+
+            data = request.get_json()
+
+            item.product_name = data.get('product_name', item.product_name)
+            item.brand = data.get('brand', item.brand)
+            item.category = data.get('category', item.category)
+            item.status = data.get('status', item.status)
+            item.price = data.get('price', item.price)
+            item.url = data.get('url', item.url)
+            item.image_url = data.get('image_url', item.image_url)
+            item.user_rating = data.get('user_rating', item.user_rating)
+            item.notes = data.get('notes', item.notes)
+
+            db.session.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'Product updated',
+                'product': item.to_dict()
+            }), 200
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error updating wardrobe item: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to update product'
+            }), 500
+
+    @app.route('/api/wardrobe/<int:item_id>', methods=['DELETE'])
+    @login_required
+    def remove_from_wardrobe(item_id):
+        """Remove product from wardrobe"""
+        from pra.models.product import Wardrobe
+
+        try:
+            item = Wardrobe.query.filter_by(id=item_id, user_id=current_user.id).first()
+
+            if not item:
+                return jsonify({'success': False, 'error': 'Item not found'}), 404
+
+            db.session.delete(item)
+            db.session.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'Product removed from wardrobe'
+            }), 200
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error removing from wardrobe: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to remove product'
+            }), 500
+
+    @app.route('/shopping-lists')
+    @login_required
+    def shopping_lists():
+        """User's shopping lists page"""
+        from pra.models.routine import ShoppingList
+
+        lists = ShoppingList.query.filter_by(user_id=current_user.id).order_by(ShoppingList.created_at.desc()).all()
+
+        return render_template('shopping_lists.html',
+                             user=current_user,
+                             shopping_lists=lists)
+
+    @app.route('/settings')
+    @login_required
+    def settings():
+        """User settings page"""
+        return render_template('settings.html', user=current_user)
+
+    @app.route('/api/add-to-shopping-list', methods=['POST'])
+    @login_required
+    def add_to_shopping_list():
+        """Add product to user's shopping list"""
+        from pra.models.routine import ShoppingList, ShoppingListItem
+        from pra.models.product import Product
+
+        try:
+            data = request.get_json()
+
+            # Get or create default shopping list for user
+            shopping_list = ShoppingList.query.filter_by(
+                user_id=current_user.id
+            ).order_by(ShoppingList.created_at.desc()).first()
+
+            if not shopping_list:
+                shopping_list = ShoppingList(
+                    user_id=current_user.id,
+                    name="My Shopping List"
+                )
+                db.session.add(shopping_list)
+                db.session.flush()  # Get the ID
+
+            # Check if product already exists in products table
+            product = Product.query.filter_by(
+                name=data.get('product_name'),
+                brand=data.get('brand')
+            ).first()
+
+            if not product:
+                # Create new product
+                product = Product(
+                    name=data.get('product_name'),
+                    brand=data.get('brand'),
+                    price=data.get('price'),
+                    url=data.get('url'),
+                    image_url=data.get('image_url'),
+                    source='user_added'
+                )
+                db.session.add(product)
+                db.session.flush()  # Get the ID
+
+            # Check if product already in shopping list
+            existing_item = ShoppingListItem.query.filter_by(
+                shopping_list_id=shopping_list.id,
+                product_id=product.id
+            ).first()
+
+            if existing_item:
+                return jsonify({
+                    'success': True,
+                    'message': 'Product already in your shopping list',
+                    'shopping_list_id': shopping_list.id
+                }), 200
+
+            # Add to shopping list
+            list_item = ShoppingListItem(
+                shopping_list_id=shopping_list.id,
+                product_id=product.id,
+                is_affordable_option=data.get('is_affordable_option', True)
+            )
+
+            db.session.add(list_item)
+            db.session.commit()
+
+            return jsonify({
+                'success': True,
+                'message': f'Added {product.name} to your shopping list!',
+                'shopping_list_id': shopping_list.id,
+                'product_id': product.id
+            }), 201
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error adding to shopping list: {str(e)}")
+            logger.error(traceback.format_exc())
+            return jsonify({
+                'success': False,
+                'error': 'Failed to add product to shopping list'
+            }), 500
+
+    @app.route('/api/shopping-list-item/<int:item_id>', methods=['PUT'])
+    @login_required
+    def update_shopping_list_item(item_id):
+        """Update shopping list item (e.g., mark as purchased)"""
+        from pra.models.routine import ShoppingListItem, ShoppingList
+
+        try:
+            # Verify item belongs to user
+            item = ShoppingListItem.query.join(ShoppingList).filter(
+                ShoppingListItem.id == item_id,
+                ShoppingList.user_id == current_user.id
+            ).first()
+
+            if not item:
+                return jsonify({'success': False, 'error': 'Item not found'}), 404
+
+            data = request.get_json()
+
+            if 'is_purchased' in data:
+                item.is_purchased = data['is_purchased']
+
+            db.session.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'Item updated successfully'
+            }), 200
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error updating shopping list item: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to update item'
+            }), 500
+
+    @app.route('/api/shopping-list-item/<int:item_id>', methods=['DELETE'])
+    @login_required
+    def remove_shopping_list_item(item_id):
+        """Remove item from shopping list"""
+        from pra.models.routine import ShoppingListItem, ShoppingList
+
+        try:
+            # Verify item belongs to user
+            item = ShoppingListItem.query.join(ShoppingList).filter(
+                ShoppingListItem.id == item_id,
+                ShoppingList.user_id == current_user.id
+            ).first()
+
+            if not item:
+                return jsonify({'success': False, 'error': 'Item not found'}), 404
+
+            db.session.delete(item)
+            db.session.commit()
+
+            return jsonify({
+                'success': True,
+                'message': 'Item removed from shopping list'
+            }), 200
+
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error removing shopping list item: {str(e)}")
+            return jsonify({
+                'success': False,
+                'error': 'Failed to remove item'
+            }), 500
 
     @app.errorhandler(404)
     def not_found(e):

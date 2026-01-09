@@ -1,6 +1,49 @@
 # Environment variables (NEVER commit secrets!)
 .env
 .env.local
+.env.docker
+
+# Sensitive Documentation (Internal Only)
+*_SETUP.md
+*_FEATURES.md
+*_GUIDE.md
+*_SUMMARY.md
+*_SUMMARY.txt
+*_COMPLETE.md
+ANALYTICS_*.md
+SECURITY_*.md
+SOC_*.md
+HOW_TO_*.md
+LIVE_*.md
+MONITORING_*.md
+IMPLEMENTATION_*.md
+IMPROVEMENTS_*.md
+IMPROVEMENTS_*.txt
+CHANGES_*.md
+ADMIN_*.md
+ADMIN_*.txt
+setup_*.py
+monitor_*.py
+check_*.py
+create_test_*.py
+test_*.py
+
+# Admin Dashboard Files (Security - Keep Internal Only)
+pra/templates/admin_*.html
+pra/templates/analytics_*.html
+pra/routes/analytics_routes.py
+
+# Monitoring stack (separate deployment)
+monitoring/
+
+# Workflow backups
+.github/workflows/*.backup
+
+# Keep only public docs
+!README.md
+!LICENSE
+!CONTRIBUTING.md
+!SECURITY.md
 
 # Python
 __pycache__/

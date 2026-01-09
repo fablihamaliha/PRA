@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 48px;
+    }
+
+    .dashboard-welcome {
+        font-size: 36px;
+        font-family: 'Cormorant Garamond', serif;
+        color: #2D2926;
+        margin-bottom: 12px;
+    }
+
+    .dashboard-subtitle {
+        font-size: 16px;
+        color: #6B6560;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+        margin-bottom: 48px;
+    }
+
+    .dashboard-card {
+        background: #FFFFFF;
+        border: 1px solid #E8E4E1;
+        border-radius: 16px;
+        padding: 32px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .dashboard-card:hover {
+        border-color: #C9A88F;
+        box-shadow: 0 4px 16px rgba(201, 168, 143, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .card-icon {
+        font-size: 32px;
+        margin-bottom: 16px;
+    }
+
+    .card-title {
+        font-size: 22px;
+        font-weight: 600;
+        color: #2D2926;
+        margin-bottom: 8px;
+    }
+
+    .card-description {
+        font-size: 14px;
+        color: #6B6560;
+        margin-bottom: 16px;
+    }
+
+    .card-action {
+        color: #C9A88F;
+        font-weight: 500;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 48px;
+    }
+
+    .stat-box {
+        background: linear-gradient(135deg, #F8F6F4 0%, #FFFFFF 100%);
+        border: 1px solid #E8E4E1;
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #C9A88F;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #6B6560;
+        font-weight: 500;
+    }
+
+    .recent-section {
+        margin-bottom: 48px;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-family: 'Cormorant Garamond', serif;
+        color: #2D2926;
+        margin-bottom: 24px;
+    }
+
+    .routine-preview {
+        background: #FFFFFF;
+        border: 1px solid #E8E4E1;
+        border-radius: 16px;
+        padding: 32px;
+    }
+
+    .routine-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        font-size: 12px;
+        font-weight: 500;
+        border-radius: 20px;
+        margin-bottom: 16px;
+    }
+
+    .routine-name {
+        font-size: 20px;
+        font-weight: 600;
+        color: #2D2926;
+        margin-bottom: 12px;
+    }
+
+    .routine-details {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .routine-detail {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #6B6560;
+    }
+
+    .routine-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(201, 168, 143, 0.3);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #C9A88F;
+        color: #C9A88F;
+    }
+
+    .btn-outline:hover {
+        background: #C9A88F;
+        color: #FFFFFF;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 64px 24px;
+        background: #F8F6F4;
+        border-radius: 16px;
+    }
+
+    .empty-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+        opacity: 0.3;
+    }
+
+    .empty-message {
+        font-size: 18px;
+        color: #6B6560;
+        margin-bottom: 24px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-welcome">Welcome back, {{ user.name }}!</h1>
+        <p class="dashboard-subtitle">Here's your skincare overview</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+        <div class="stat-box">
+            <div class="stat-number">{{ stats.routine_count }}</div>
+            <div class="stat-label">Active Routine{{ 's' if stats.routine_count != 1 else '' }}</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ stats.wardrobe_count }}</div>
+            <div class="stat-label">Products in Wardrobe</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ stats.shopping_list_count }}</div>
+            <div class="stat-label">Items in Shopping List</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">${{ "%.2f"|format(stats.estimated_savings) }}</div>
+            <div class="stat-label">Estimated Savings</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-grid">
+        <div class="dashboard-card" onclick="window.location.href='/build-routine'">
+            <div class="card-icon">✨</div>
+            <h3 class="card-title">My Routine</h3>
+            <p class="card-description">View or update your personalized skincare routine</p>
+            <span class="card-action">Manage routine →</span>
+        </div>
+
+        <div class="dashboard-card" onclick="window.location.href='/wardrobe'">
+            <div class="card-icon">💼</div>
+            <h3 class="card-title">My Wardrobe</h3>
+            <p class="card-description">Browse products you own or want to try</p>
+            <span class="card-action">View wardrobe →</span>
+        </div>
+
+        <div class="dashboard-card" onclick="window.location.href='/shopping-lists'">
+            <div class="card-icon">🛒</div>
+            <h3 class="card-title">Shopping Lists</h3>
+            <p class="card-description">Manage your shopping lists and track purchases</p>
+            <span class="card-action">View lists →</span>
+        </div>
+
+        <div class="dashboard-card" onclick="window.location.href='/todays-deals'">
+            <div class="card-icon">💰</div>
+            <h3 class="card-title">Find Deals</h3>
+            <p class="card-description">Discover the best prices on skincare products</p>
+            <span class="card-action">Browse deals →</span>
+        </div>
+    </div>
+
+    <!-- Current Routine -->
+    {% if routine %}
+    <div class="recent-section">
+        <h2 class="section-title">Your Current Routine</h2>
+        <div class="routine-preview">
+            <span class="routine-badge">{{ routine.skin_type|title }} Skin</span>
+            <h3 class="routine-name">Personalized {{ routine.skin_type|title }} Routine</h3>
+            <div class="routine-details">
+                <div class="routine-detail">
+                    <span>🎯</span>
+                    <span>{{ routine.concerns|length }} Concern{{ 's' if routine.concerns|length != 1 else '' }}</span>
+                </div>
+                <div class="routine-detail">
+                    <span>☀️</span>
+                    <span>{{ routine.am_steps }} AM Steps</span>
+                </div>
+                <div class="routine-detail">
+                    <span>🌙</span>
+                    <span>{{ routine.pm_steps }} PM Steps</span>
+                </div>
+                <div class="routine-detail">
+                    <span>📅</span>
+                    <span>Updated {{ routine.updated_ago }}</span>
+                </div>
+            </div>
+            <div class="routine-actions">
+                <a href="/routine-results/{{ routine.session_id }}" class="btn btn-primary">View Full Routine</a>
+                <a href="/build-routine?update=true" class="btn btn-outline">Update Routine</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="recent-section">
+        <h2 class="section-title">Get Started</h2>
+        <div class="empty-state">
+            <div class="empty-icon">✨</div>
+            <p class="empty-message">You haven't created a routine yet!</p>
+            <a href="/build-routine" class="btn btn-primary">Build Your First Routine</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

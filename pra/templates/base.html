@@ -12,6 +12,117 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Profile Dropdown Styles -->
+    <style>
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-trigger {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid #E8E4E1;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            color: #2D2926;
+        }
+
+        .profile-trigger:hover {
+            border-color: #C9A88F;
+            background: #F8F6F4;
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .profile-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: #FFFFFF;
+            border: 1px solid #E8E4E1;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            min-width: 220px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .profile-dropdown.active .profile-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-header {
+            padding: 16px;
+            border-bottom: 1px solid #E8E4E1;
+        }
+
+        .dropdown-user-name {
+            font-weight: 600;
+            color: #2D2926;
+            margin-bottom: 4px;
+        }
+
+        .dropdown-user-email {
+            font-size: 13px;
+            color: #6B6560;
+        }
+
+        .dropdown-menu-items {
+            padding: 8px 0;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #2D2926;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .dropdown-item:hover {
+            background: #F8F6F4;
+            color: #C9A88F;
+        }
+
+        .dropdown-item-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #E8E4E1;
+            margin: 8px 0;
+        }
+    </style>
+
     <!-- Page-specific styles -->
     {% block extra_css %}{% endblock %}
 </head>
@@ -40,6 +151,8 @@
 
     <!-- Common Session Check Script -->
     <script>
+        let currentUserData = null;
+
         // Check if user is logged in and update header
         async function checkUserSession() {
             try {
@@ -49,15 +162,66 @@
                 const headerActions = document.getElementById('headerActions');
 
                 if (data.authenticated && data.user) {
+                    currentUserData = data.user;
+                    const initials = data.user.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+
                     headerActions.innerHTML = `
-                        <span class="account-link" style="cursor: default;">Hi, ${data.user.name}</span>
-                        <button class="account-link signup" onclick="logout()" style="border: none; cursor: pointer;">Log Out</button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <button class="profile-trigger" onclick="toggleProfileMenu(event)">
+                                <div class="profile-avatar">${initials}</div>
+                                <span>${data.user.name}</span>
+                                <span style="font-size: 12px;">▼</span>
+                            </button>
+                            <div class="profile-dropdown-menu">
+                                <div class="dropdown-header">
+                                    <div class="dropdown-user-name">${data.user.name}</div>
+                                    <div class="dropdown-user-email">${data.user.email}</div>
+                                </div>
+                                <div class="dropdown-menu-items">
+                                    <a href="/dashboard" class="dropdown-item">
+                                        <span class="dropdown-item-icon">🏠</span>
+                                        <span>Dashboard</span>
+                                    </a>
+                                    <a href="/wardrobe" class="dropdown-item">
+                                        <span class="dropdown-item-icon">💼</span>
+                                        <span>My Wardrobe</span>
+                                    </a>
+                                    <a href="/shopping-lists" class="dropdown-item">
+                                        <span class="dropdown-item-icon">🛒</span>
+                                        <span>Shopping Lists</span>
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="/settings" class="dropdown-item">
+                                        <span class="dropdown-item-icon">⚙️</span>
+                                        <span>Settings</span>
+                                    </a>
+                                    <div class="dropdown-item" onclick="logout()">
+                                        <span class="dropdown-item-icon">🚪</span>
+                                        <span>Log Out</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     `;
                 }
             } catch (error) {
                 console.error('Error checking user session:', error);
             }
         }
+
+        function toggleProfileMenu(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('profileDropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
 
         async function logout() {
             try {

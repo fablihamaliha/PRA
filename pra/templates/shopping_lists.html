@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}My Shopping Lists{% endblock %}
+
+{% block extra_css %}
+<style>
+    .shopping-lists-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .lists-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 48px;
+    }
+
+    .lists-title {
+        font-size: 36px;
+        font-family: 'Cormorant Garamond', serif;
+        color: #2D2926;
+    }
+
+    .btn-create-list {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-create-list:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(201, 168, 143, 0.3);
+    }
+
+    .lists-grid {
+        display: grid;
+        gap: 24px;
+    }
+
+    .list-card {
+        background: #FFFFFF;
+        border: 1px solid #E8E4E1;
+        border-radius: 16px;
+        padding: 28px;
+        transition: all 0.3s ease;
+    }
+
+    .list-card:hover {
+        border-color: #C9A88F;
+        box-shadow: 0 8px 24px rgba(201, 168, 143, 0.15);
+    }
+
+    .list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .list-name {
+        font-size: 24px;
+        font-weight: 600;
+        color: #2D2926;
+    }
+
+    .list-item-count {
+        color: #6B6560;
+        font-size: 14px;
+    }
+
+    .list-items {
+        display: grid;
+        gap: 16px;
+    }
+
+    .list-item {
+        display: flex;
+        gap: 16px;
+        padding: 16px;
+        background: #F8F6F4;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .list-item:hover {
+        background: #F0EDE8;
+    }
+
+    .item-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        background: #FFFFFF;
+    }
+
+    .item-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .item-name {
+        font-weight: 600;
+        color: #2D2926;
+        font-size: 15px;
+    }
+
+    .item-brand {
+        color: #6B6560;
+        font-size: 13px;
+    }
+
+    .item-price {
+        color: #C9A88F;
+        font-weight: 600;
+        font-size: 14px;
+        margin-top: 4px;
+    }
+
+    .item-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .btn-remove {
+        padding: 8px 16px;
+        background: transparent;
+        color: #C9A88F;
+        border: 1px solid #C9A88F;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-remove:hover {
+        background: #C9A88F;
+        color: #FFFFFF;
+    }
+
+    .checkbox-purchased {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 24px;
+        color: #6B6560;
+    }
+
+    .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+    }
+
+    .empty-state-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #2D2926;
+        margin-bottom: 8px;
+    }
+
+    .empty-state-text {
+        font-size: 16px;
+        margin-bottom: 24px;
+    }
+
+    .badge-affordable {
+        display: inline-block;
+        padding: 4px 10px;
+        background: #4CAF50;
+        color: #FFFFFF;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+
+    .badge-luxury {
+        display: inline-block;
+        padding: 4px 10px;
+        background: #C9A88F;
+        color: #FFFFFF;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="shopping-lists-container">
+    <div class="lists-header">
+        <h1 class="lists-title">My Shopping Lists</h1>
+    </div>
+
+    {% if shopping_lists %}
+        <div class="lists-grid">
+            {% for list in shopping_lists %}
+            <div class="list-card">
+                <div class="list-header">
+                    <div>
+                        <h2 class="list-name">{{ list.name }}</h2>
+                        <p class="list-item-count">{{ list.shopping_list_items|length }} item{{ 's' if list.shopping_list_items|length != 1 else '' }}</p>
+                    </div>
+                </div>
+
+                {% if list.shopping_list_items %}
+                <div class="list-items">
+                    {% for item in list.shopping_list_items %}
+                    <div class="list-item" data-item-id="{{ item.id }}">
+                        <img src="{{ item.product.image_url or 'https://via.placeholder.com/80' }}"
+                             alt="{{ item.product.name }}"
+                             class="item-image">
+                        <div class="item-info">
+                            <div class="item-name">
+                                {{ item.product.name }}
+                                {% if item.is_affordable_option %}
+                                <span class="badge-affordable">Budget</span>
+                                {% else %}
+                                <span class="badge-luxury">Luxury</span>
+                                {% endif %}
+                            </div>
+                            <div class="item-brand">{{ item.product.brand }}</div>
+                            <div class="item-price">${{ "%.2f"|format(item.product.price or 0) }}</div>
+                            {% if item.product.url %}
+                            <a href="{{ item.product.url }}" target="_blank" style="color: #C9A88F; font-size: 13px; text-decoration: none;">View Product →</a>
+                            {% endif %}
+                        </div>
+                        <div class="item-actions">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: #6B6560;">
+                                <input type="checkbox"
+                                       class="checkbox-purchased"
+                                       {% if item.is_purchased %}checked{% endif %}
+                                       onchange="togglePurchased({{ item.id }}, this.checked)">
+                                Purchased
+                            </label>
+                            <button class="btn-remove" onclick="removeFromList({{ item.id }})">Remove</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 40px; color: #6B6560;">
+                    This list is empty. Add products from your routine deals!
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">🛒</div>
+            <h3 class="empty-state-title">No Shopping Lists Yet</h3>
+            <p class="empty-state-text">Start building your routine to discover products and add them to your shopping list!</p>
+            <a href="/build-routine" class="btn-create-list">Build Your Routine</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function togglePurchased(itemId, isPurchased) {
+        try {
+            const response = await fetch(`/api/shopping-list-item/${itemId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_purchased: isPurchased })
+            });
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to update item');
+            }
+        } catch (error) {
+            console.error('Error updating item:', error);
+            alert('Failed to update item: ' + error.message);
+        }
+    }
+
+    async function removeFromList(itemId) {
+        if (!confirm('Remove this item from your shopping list?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/shopping-list-item/${itemId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Remove item from DOM
+                const itemElement = document.querySelector(`[data-item-id="${itemId}"]`);
+                if (itemElement) {
+                    itemElement.style.opacity = '0';
+                    setTimeout(() => {
+                        itemElement.remove();
+
+                        // Reload page if no items left to update counts
+                        const listItems = document.querySelectorAll('.list-item');
+                        if (listItems.length === 0) {
+                            location.reload();
+                        }
+                    }, 300);
+                }
+            } else {
+                throw new Error(data.error || 'Failed to remove item');
+            }
+        } catch (error) {
+            console.error('Error removing item:', error);
+            alert('Failed to remove item: ' + error.message);
+        }
+    }
+</script>
+{% endblock %}

@@ -27,7 +27,7 @@ PRA (Product Recommendation Application) is an intelligent skincare recommendati
 - Uses OpenAI GPT for intelligent product analysis and recommendations
 - Provides a responsive web interface for users to manage their skincare routines
 
-**Live Application:** https://tyisha-unoppressed-luvenia.ngrok-free.dev
+**Live Application:** https://skincares.work
 
 ---
 
@@ -103,6 +103,13 @@ Developer pushes to master
 - **Flask-Login** - User authentication and session management
 - **OpenAI API** - GPT-4 integration for intelligent recommendations
 
+### Security & Monitoring
+- **Advanced Security Middleware** - Threat detection and prevention
+- **Email Notification Service** - SMTP-based alerting system
+- **Real-time Analytics** - Visitor tracking and monitoring
+- **Rate Limiting** - DDoS protection
+- **User Agent Parsing** - Device and browser detection
+
 ### External APIs
 - **RapidAPI** - Real-time product search
 - **Google Custom Search API** - Product discovery
@@ -112,7 +119,8 @@ Developer pushes to master
 - **Docker** - Containerization
 - **GitHub Actions** - CI/CD automation
 - **GitHub Container Registry (ghcr.io)** - Docker image hosting
-- **ngrok** - Secure public HTTPS tunneling
+- **Cloudflare** - Custom domain, CDN, DDoS protection, SSL/TLS
+- **Cloudflare Tunnel** - Secure public HTTPS access
 - **Raspberry Pi** - Self-hosted deployment target
 
 ### Development Tools
@@ -156,13 +164,25 @@ Developer pushes to master
    - Zero-downtime deployments
    - Health checks and rollback capability
 
-2. **Security**
-   - HTTPS via ngrok
+2. **Security & Monitoring**
+   - HTTPS via Cloudflare (with free SSL/TLS)
+   - Custom domain with Cloudflare CDN
    - Secure password hashing
    - HTTP-only cookies
    - Environment-based secrets management
+   - Enterprise-grade security monitoring
+   - Real-time threat detection and prevention
+   - Rate limiting and IP blocking
+   - Email notifications for critical issues
 
-3. **Scalability**
+3. **Admin Dashboard**
+   - Real-time application insights
+   - Visitor analytics and tracking
+   - Security event monitoring
+   - System health monitoring
+   - Email alerts for critical events (Dynatrace-style)
+
+4. **Scalability**
    - Containerized architecture
    - Database connection pooling
    - Prepared for horizontal scaling
@@ -729,17 +749,35 @@ pytest tests/ --cov=pra --cov-report=html
 
 ## 📝 Environment Variables Reference
 
+### Core Configuration
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
 | `SECRET_KEY` | Flask secret key for sessions | Yes | - |
 | `DATABASE_URL` | PostgreSQL connection string | Yes | localhost |
 | `FLASK_ENV` | Environment (development/production) | No | development |
 | `FLASK_DEBUG` | Enable debug mode | No | False |
+
+### API Keys
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
 | `RAPIDAPI_KEY` | RapidAPI key for product search | Yes | - |
 | `OPENAI_API_KEY` | OpenAI API key for GPT | Yes | - |
 | `GOOGLE_API_KEY` | Google Custom Search API key | No | - |
 | `WALMART_API_KEY` | Walmart API key | No | - |
 | `BEST_BUY_API_KEY` | Best Buy API key | No | - |
+
+### Email Notifications (Optional)
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `EMAIL_NOTIFICATIONS_ENABLED` | Enable email alerts | No | false |
+| `SMTP_SERVER` | SMTP server hostname | No | smtp.gmail.com |
+| `SMTP_PORT` | SMTP server port | No | 587 |
+| `SMTP_USERNAME` | SMTP login username | No | - |
+| `SMTP_PASSWORD` | SMTP login password | No | - |
+| `ADMIN_EMAIL` | Admin email for alerts | No | admin@example.com |
+| `FROM_EMAIL` | Sender email address | No | SMTP_USERNAME |
+
+**Note:** For Gmail, use [App Passwords](https://support.google.com/accounts/answer/185833) instead of your regular password.
 
 ---
 
@@ -808,7 +846,7 @@ Built by [Your Name] as part of [Your Project/Course].
 ## 🔗 Links
 
 - **GitHub Repository:** https://github.com/fablihamaliha/PRA
-- **Live Application:** https://tyisha-unoppressed-luvenia.ngrok-free.dev
+- **Live Application:** https://skincares.work
 - **Docker Image:** ghcr.io/fablihamaliha/pra:latest
 
 ---

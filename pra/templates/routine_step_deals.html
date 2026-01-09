@@ -95,6 +95,83 @@
         text-decoration: underline;
     }
 
+    .deal-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+    }
+
+    .btn-add-to-list {
+        padding: 8px 16px;
+        background: linear-gradient(135deg, #C9A88F 0%, #B8977D 100%);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        flex: 1;
+    }
+
+    .btn-add-to-list:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(201, 168, 143, 0.3);
+    }
+
+    .btn-add-to-list:disabled {
+        background: #E8E4E1;
+        color: #6B6560;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-view-product {
+        padding: 8px 16px;
+        background: transparent;
+        color: #C9A88F;
+        border: 1px solid #C9A88F;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        flex: 1;
+    }
+
+    .btn-view-product:hover {
+        background: #C9A88F;
+        color: #FFFFFF;
+    }
+
+    .success-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #4CAF50;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
     @media (max-width: 900px) {
         .deals-grid {
             grid-template-columns: 1fr;
@@ -138,12 +215,21 @@
                     {% if product.ingredients %}
                         <div class="deal-meta">Ingredients: {{ product.ingredients|join(', ') }}</div>
                     {% endif %}
+                    {% if product.brand %}
                     <div class="deal-meta">
-                        <span>Retailer: {{ product.source|title }}</span>
+                        <span>Retailer: {{ product.brand }}</span>
                     </div>
-                    {% if product.url %}
-                        <a class="deal-link" href="{{ product.url }}" target="_blank" rel="noopener">View retailer →</a>
                     {% endif %}
+                    <div class="deal-actions">
+                        <button class="btn-add-to-list"
+                                data-product='{{ product|tojson }}'
+                                onclick="addToShoppingListFromButton(this)">
+                            + Add to List
+                        </button>
+                        {% if product.url %}
+                        <a class="btn-view-product" href="{{ product.url }}" target="_blank" rel="noopener">View Product</a>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endfor %}
             {% else %}
@@ -169,12 +255,21 @@
                     {% if product.ingredients %}
                         <div class="deal-meta">Ingredients: {{ product.ingredients|join(', ') }}</div>
                     {% endif %}
+                    {% if product.brand %}
                     <div class="deal-meta">
-                        <span>Retailer: {{ product.source|title }}</span>
+                        <span>Retailer: {{ product.brand }}</span>
                     </div>
-                    {% if product.url %}
-                        <a class="deal-link" href="{{ product.url }}" target="_blank" rel="noopener">View retailer →</a>
                     {% endif %}
+                    <div class="deal-actions">
+                        <button class="btn-add-to-list"
+                                data-product='{{ product|tojson }}'
+                                onclick="addToShoppingListFromButton(this)">
+                            + Add to List
+                        </button>
+                        {% if product.url %}
+                        <a class="btn-view-product" href="{{ product.url }}" target="_blank" rel="noopener">View Product</a>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endfor %}
             {% else %}
@@ -183,4 +278,101 @@
         </div>
     </div>
 </div>
+
+<div id="successMessage" class="success-message" style="display: none;"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function addToShoppingListFromButton(buttonElement) {
+        console.log('Function called!');
+        console.log('Button element:', buttonElement);
+
+        try {
+            // Get product data from data attribute
+            const productJson = buttonElement.getAttribute('data-product');
+            console.log('Product JSON:', productJson);
+
+            const product = JSON.parse(productJson);
+            console.log('Parsed product:', product);
+
+            // Call the main function
+            addToShoppingList(product, buttonElement);
+        } catch (error) {
+            console.error('Error parsing product data:', error);
+            alert('Error loading product data. Please refresh the page and try again.');
+        }
+    }
+
+    async function addToShoppingList(product, buttonElement) {
+        console.log('Adding to shopping list...');
+        console.log('Product:', product);
+
+        try {
+            buttonElement.disabled = true;
+            buttonElement.textContent = 'Adding...';
+
+            console.log('Preparing to send data...');
+            const payload = {
+                product_name: product.name || product.product_name,
+                brand: product.brand,
+                price: product.price,
+                url: product.url,
+                image_url: product.image_url,
+                is_affordable_option: product.price <= 30
+            };
+            console.log('Payload:', payload);
+
+            console.log('Sending request to /api/add-to-shopping-list...');
+            const response = await fetch('/api/add-to-shopping-list', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            console.log('Response status:', response.status);
+            const data = await response.json();
+            console.log('Response data:', data);
+
+            if (response.status === 401) {
+                console.log('User not logged in - redirecting...');
+                window.location.href = '/auth?next=' + encodeURIComponent(window.location.href);
+                return;
+            }
+
+            if (data.success) {
+                console.log('Success! Showing notification...');
+                showSuccess(data.message || 'Added to shopping list!');
+                buttonElement.textContent = '✓ Added';
+                buttonElement.style.background = '#4CAF50';
+            } else {
+                console.error('Server returned error:', data.error);
+                throw new Error(data.error || 'Failed to add to shopping list');
+            }
+        } catch (error) {
+            console.error('Caught error:', error);
+            console.error('Error type:', error.constructor.name);
+            console.error('Error message:', error.message);
+            console.error('Product data:', product);
+
+            if (error.message.includes('Failed to fetch')) {
+                alert('Network error: Please check your internet connection and try again.');
+            } else {
+                alert('Failed to add to shopping list: ' + error.message);
+            }
+            buttonElement.disabled = false;
+            buttonElement.textContent = '+ Add to List';
+        }
+    }
+
+    function showSuccess(message) {
+        const successDiv = document.getElementById('successMessage');
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+
+        setTimeout(() => {
+            successDiv.style.display = 'none';
+        }, 3000);
+    }
+</script>
 {% endblock %}

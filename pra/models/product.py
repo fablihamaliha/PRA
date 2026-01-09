@@ -93,3 +93,56 @@ class Product(db.Model):
             'num_reviews': self.num_reviews,
             'last_seen_at': self.last_seen_at.isoformat()
         }
+
+
+class Wardrobe(db.Model):
+    """User's collection of products they own or want to try"""
+    __tablename__ = 'wardrobe'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=True)
+
+    # Product info (stored directly if not in products table)
+    product_name = db.Column(db.String(500), nullable=False)
+    brand = db.Column(db.String(255), nullable=False)
+    price = db.Column(db.Float, nullable=True)
+    url = db.Column(db.Text, nullable=True)
+    image_url = db.Column(db.Text, nullable=True)
+
+    # Wardrobe-specific fields
+    status = db.Column(db.String(50), default='want_to_try')  # 'own', 'want_to_try', 'used_to_own'
+    category = db.Column(db.String(100), nullable=True)  # cleanser, serum, moisturizer, etc.
+    notes = db.Column(db.Text, nullable=True)  # User's personal notes
+    purchase_date = db.Column(db.DateTime, nullable=True)
+
+    # Ratings
+    user_rating = db.Column(db.Integer, nullable=True)  # 1-5 stars
+
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # Relationships
+    user = db.relationship('User', backref='wardrobe_items')
+    product = db.relationship('Product', backref='in_wardrobes')
+
+    def __repr__(self):
+        return f'<Wardrobe {self.user_id} - {self.product_name}>'
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'product_name': self.product_name,
+            'brand': self.brand,
+            'price': self.price,
+            'url': self.url,
+            'image_url': self.image_url,
+            'status': self.status,
+            'category': self.category,
+            'notes': self.notes,
+            'purchase_date': self.purchase_date.isoformat() if self.purchase_date else None,
+            'user_rating': self.user_rating,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }

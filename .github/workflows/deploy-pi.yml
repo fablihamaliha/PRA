@@ -1,3 +1,6 @@
+# Deploy to Raspberry Pi
+# SECURITY: Only runs on self-hosted runner (your Raspberry Pi) for the repository owner
+
 name: Deploy to Raspberry Pi
 
 on:
@@ -7,8 +10,29 @@ on:
   workflow_dispatch:  # Allow manual triggers
 
 jobs:
+  # Security: Verify repository ownership before deployment
+  verify-owner:
+    name: Verify Repository Owner
+    runs-on: ubuntu-latest
+    outputs:
+      is-owner: ${{ steps.check.outputs.is-owner }}
+    steps:
+      - name: Check if repository owner
+        id: check
+        run: |
+          if [ "${{ github.repository_owner }}" = "fablihamaliha" ] && [ "${{ github.repository }}" = "fablihamaliha/PRA" ]; then
+            echo "is-owner=true" >> $GITHUB_OUTPUT
+            echo "✅ Authorized: Repository owner and repo verified"
+          else
+            echo "is-owner=false" >> $GITHUB_OUTPUT
+            echo "❌ Unauthorized: This deployment workflow only runs for fablihamaliha/PRA"
+            exit 1
+          fi
+
   deploy:
     runs-on: self-hosted
+    needs: verify-owner
+    if: needs.verify-owner.outputs.is-owner == 'true'
 
     steps:
       - name: Checkout code
