@@ -5,7 +5,7 @@
 .env.example
 
 # Public-facing files (keep private for security)
-README.md
+# README.md
 SECURITY.md
 LICENSE
 CONTRIBUTING.md
