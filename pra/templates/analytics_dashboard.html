@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #0a0e27;
+        color: #e8eaed;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    .analytics-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .section-title {
+        color: #ffffff;
+    }
+
+    .section-subtitle {
+        color: #9aa0b9;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #1e2139 0%, #13162b 100%);
+        border: 1px solid #2a2f4a;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .stat-label {
+        color: #6c7293;
+        font-size: 12px;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .table-section {
+        margin-top: 32px;
+    }
+
+    .table-title {
+        font-size: 18px;
+        margin-bottom: 12px;
+        color: #ffffff;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #1e2139;
+        border: 1px solid #2a2f4a;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    th, td {
+        padding: 12px 14px;
+        text-align: left;
+        font-size: 13px;
+        border-bottom: 1px solid #2a2f4a;
+    }
+
+    th {
+        background: #13162b;
+        color: #9aa0b9;
+        font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <h1 class="section-title">Analytics Dashboard</h1>
+    <p class="section-subtitle">Live traffic, security events, and usage stats.</p>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Visits</div>
+            <div class="stat-value">{{ stats.total_visits }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Visits (Last 24h)</div>
+            <div class="stat-value">{{ stats.visits_last_24h }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Unique IPs (Last 24h)</div>
+            <div class="stat-value">{{ stats.unique_ips_last_24h }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Security Events</div>
+            <div class="stat-value">{{ stats.total_security_events }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Security Events (Last 24h)</div>
+            <div class="stat-value">{{ stats.security_events_last_24h }}</div>
+        </div>
+    </div>
+
+    <div class="table-section">
+        <div class="table-title">Recent Visitors</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>IP</th>
+                    <th>Path</th>
+                    <th>Browser</th>
+                    <th>OS</th>
+                </tr>
+            </thead>
+            <tbody id="visitorsTable"></tbody>
+        </table>
+    </div>
+
+    <div class="table-section">
+        <div class="table-title">Security Events</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Severity</th>
+                    <th>Path</th>
+                    <th>IP</th>
+                </tr>
+            </thead>
+            <tbody id="eventsTable"></tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadAnalytics() {
+        const [visitorsRes, eventsRes] = await Promise.all([
+            fetch('/analytics/api/visitors'),
+            fetch('/analytics/api/security-events')
+        ]);
+
+        const visitorsData = await visitorsRes.json();
+        const eventsData = await eventsRes.json();
+
+        const visitorsTable = document.getElementById('visitorsTable');
+        visitorsTable.innerHTML = (visitorsData.visitors || []).slice(0, 20).map(v => `
+            <tr>
+                <td>${new Date(v.created_at).toLocaleString()}</td>
+                <td>${v.ip_address || '-'}</td>
+                <td>${v.path || '-'}</td>
+                <td>${v.browser || '-'}</td>
+                <td>${v.os || '-'}</td>
+            </tr>
+        `).join('');
+
+        const eventsTable = document.getElementById('eventsTable');
+        eventsTable.innerHTML = (eventsData.events || []).slice(0, 20).map(e => `
+            <tr>
+                <td>${new Date(e.created_at).toLocaleString()}</td>
+                <td>${e.event_type}</td>
+                <td>${e.severity}</td>
+                <td>${e.path || '-'}</td>
+                <td>${e.ip_address || '-'}</td>
+            </tr>
+        `).join('');
+    }
+
+    loadAnalytics();
+</script>
+{% endblock %}

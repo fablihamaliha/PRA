@@ -1,0 +1,822 @@
+{% extends "base.html" %}
+
+{% block title %}Security Operations Center - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: #0a0e27;
+        color: #e8eaed;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        overflow-x: hidden;
+    }
+
+    .soc-container {
+        padding: 20px;
+        max-width: 100%;
+    }
+
+    .soc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 2px solid #1e2139;
+        margin-bottom: 30px;
+    }
+
+    .soc-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .status-badge.operational {
+        background: rgba(46, 213, 115, 0.15);
+        color: #2ed573;
+        border: 1px solid rgba(46, 213, 115, 0.3);
+    }
+
+    .status-badge.warning {
+        background: rgba(255, 159, 67, 0.15);
+        color: #ff9f43;
+        border: 1px solid rgba(255, 159, 67, 0.3);
+    }
+
+    .status-badge.critical {
+        background: rgba(255, 71, 87, 0.15);
+        color: #ff4757;
+        border: 1px solid rgba(255, 71, 87, 0.3);
+    }
+
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: currentColor;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.2); }
+    }
+
+    .timestamp {
+        font-size: 13px;
+        color: #6c7293;
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .metric-card {
+        background: linear-gradient(135deg, #1e2139 0%, #13162b 100%);
+        border: 1px solid #2a2f4a;
+        border-radius: 12px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+        border-color: #3a4068;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .metric-card.alert {
+        border-color: #ff4757;
+        background: linear-gradient(135deg, #2a1520 0%, #1e1520 100%);
+    }
+
+    .metric-card.warning {
+        border-color: #ffa502;
+        background: linear-gradient(135deg, #2a2115 0%, #1e1a15 100%);
+    }
+
+    .metric-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 32px;
+        opacity: 0.3;
+    }
+
+    .metric-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6c7293;
+        margin-bottom: 8px;
+        font-weight: 600;
+    }
+
+    .metric-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 8px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .metric-card.alert .metric-value {
+        color: #ff4757;
+    }
+
+    .metric-card.warning .metric-value {
+        color: #ffa502;
+    }
+
+    .metric-change {
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .metric-change.up {
+        color: #ff4757;
+    }
+
+    .metric-change.down {
+        color: #2ed573;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    @media (max-width: 1200px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Panel Styles */
+    .panel {
+        background: #1e2139;
+        border: 1px solid #2a2f4a;
+        border-radius: 12px;
+        padding: 24px;
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #2a2f4a;
+    }
+
+    .panel-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .panel-action {
+        font-size: 12px;
+        color: #5b8def;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .panel-action:hover {
+        color: #7ba6ff;
+    }
+
+    /* Table Styles */
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .data-table th {
+        text-align: left;
+        padding: 12px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c7293;
+        font-weight: 600;
+        border-bottom: 1px solid #2a2f4a;
+    }
+
+    .data-table td {
+        padding: 14px 12px;
+        font-size: 13px;
+        border-bottom: 1px solid #2a2f4a;
+        color: #e8eaed;
+    }
+
+    .data-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .data-table tr:hover {
+        background: rgba(91, 141, 239, 0.05);
+    }
+
+    /* Badges */
+    .severity-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .severity-critical {
+        background: rgba(255, 71, 87, 0.15);
+        color: #ff4757;
+        border: 1px solid rgba(255, 71, 87, 0.3);
+    }
+
+    .severity-high {
+        background: rgba(255, 107, 107, 0.15);
+        color: #ff6b6b;
+        border: 1px solid rgba(255, 107, 107, 0.3);
+    }
+
+    .severity-medium {
+        background: rgba(255, 159, 67, 0.15);
+        color: #ff9f43;
+        border: 1px solid rgba(255, 159, 67, 0.3);
+    }
+
+    .severity-low {
+        background: rgba(72, 219, 251, 0.15);
+        color: #48dbfb;
+        border: 1px solid rgba(72, 219, 251, 0.3);
+    }
+
+    .ip-badge {
+        font-family: 'Monaco', 'Courier New', monospace;
+        background: rgba(91, 141, 239, 0.1);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #5b8def;
+    }
+
+    /* Activity Feed */
+    .activity-item {
+        display: flex;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #2a2f4a;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .activity-icon.threat {
+        background: rgba(255, 71, 87, 0.15);
+        color: #ff4757;
+    }
+
+    .activity-icon.access {
+        background: rgba(46, 213, 115, 0.15);
+        color: #2ed573;
+    }
+
+    .activity-icon.warning {
+        background: rgba(255, 159, 67, 0.15);
+        color: #ff9f43;
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-size: 13px;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+    .activity-meta {
+        font-size: 11px;
+        color: #6c7293;
+    }
+
+    .activity-time {
+        font-size: 11px;
+        color: #6c7293;
+        flex-shrink: 0;
+    }
+
+    /* System Health */
+    .health-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #2a2f4a;
+    }
+
+    .health-item:last-child {
+        border-bottom: none;
+    }
+
+    .health-label {
+        font-size: 13px;
+        color: #e8eaed;
+    }
+
+    .health-value {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .health-bar {
+        width: 100px;
+        height: 6px;
+        background: #2a2f4a;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .health-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2ed573 0%, #7bed9f 100%);
+        transition: width 0.3s ease;
+    }
+
+    .health-bar-fill.warning {
+        background: linear-gradient(90deg, #ffa502 0%, #ffc048 100%);
+    }
+
+    .health-bar-fill.critical {
+        background: linear-gradient(90deg, #ff4757 0%, #ff6b81 100%);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c7293;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    /* Action Buttons */
+    .action-btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .action-btn.primary {
+        background: #5b8def;
+        color: #fff;
+    }
+
+    .action-btn.primary:hover {
+        background: #7ba6ff;
+    }
+
+    .action-btn.danger {
+        background: rgba(255, 71, 87, 0.15);
+        color: #ff4757;
+        border: 1px solid rgba(255, 71, 87, 0.3);
+    }
+
+    .action-btn.danger:hover {
+        background: rgba(255, 71, 87, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="soc-container">
+    <!-- Header -->
+    <div class="soc-header">
+        <div class="soc-title">
+            🛡️ Security Operations Center
+        </div>
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <span class="status-badge operational">
+                <span class="pulse-dot"></span>
+                SYSTEM OPERATIONAL
+            </span>
+            <span class="timestamp" id="live-timestamp">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <span class="metric-icon">👥</span>
+            <div class="metric-label">Active Sessions</div>
+            <div class="metric-value" id="active-sessions">0</div>
+            <div class="metric-change">Real-time monitoring</div>
+        </div>
+
+        <div class="metric-card" id="threat-card">
+            <span class="metric-icon">🚨</span>
+            <div class="metric-label">Threats Detected (24h)</div>
+            <div class="metric-value" id="threats-24h">0</div>
+            <div class="metric-change up" id="threat-change">
+                <span>↑</span> <span id="threat-change-value">0</span> from yesterday
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <span class="metric-icon">🌐</span>
+            <div class="metric-label">Total Requests (24h)</div>
+            <div class="metric-value" id="requests-24h">0</div>
+            <div class="metric-change">Across all endpoints</div>
+        </div>
+
+        <div class="metric-card">
+            <span class="metric-icon">🔒</span>
+            <div class="metric-label">Failed Auth Attempts</div>
+            <div class="metric-value" id="failed-auth">0</div>
+            <div class="metric-change">Last 24 hours</div>
+        </div>
+
+        <div class="metric-card">
+            <span class="metric-icon">⚡</span>
+            <div class="metric-label">Avg Response Time</div>
+            <div class="metric-value" id="avg-response">--</div>
+            <div class="metric-change">Milliseconds</div>
+        </div>
+
+        <div class="metric-card">
+            <span class="metric-icon">🌍</span>
+            <div class="metric-label">Unique Visitors</div>
+            <div class="metric-value" id="unique-visitors">0</div>
+            <div class="metric-change">Last 24 hours</div>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Security Threats Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    🔴 Active Threats & Incidents
+                </div>
+                <a href="#" class="panel-action" onclick="refreshData(); return false;">Refresh</a>
+            </div>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Threat Type</th>
+                            <th>Severity</th>
+                            <th>Source IP</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="threats-table">
+                        <tr>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">🛡️</div>
+                                    <div>No active threats detected</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- System Health Panel -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    💚 System Health
+                </div>
+            </div>
+            <div>
+                <div class="health-item">
+                    <div class="health-label">API Response Time</div>
+                    <div class="health-value">
+                        <div class="health-bar">
+                            <div class="health-bar-fill" id="api-health" style="width: 85%"></div>
+                        </div>
+                        <span id="api-health-text">Excellent</span>
+                    </div>
+                </div>
+                <div class="health-item">
+                    <div class="health-label">Database Performance</div>
+                    <div class="health-value">
+                        <div class="health-bar">
+                            <div class="health-bar-fill" id="db-health" style="width: 90%"></div>
+                        </div>
+                        <span id="db-health-text">Excellent</span>
+                    </div>
+                </div>
+                <div class="health-item">
+                    <div class="health-label">Security Score</div>
+                    <div class="health-value">
+                        <div class="health-bar">
+                            <div class="health-bar-fill" id="security-score" style="width: 95%"></div>
+                        </div>
+                        <span id="security-score-text">A+</span>
+                    </div>
+                </div>
+                <div class="health-item">
+                    <div class="health-label">Uptime (24h)</div>
+                    <div class="health-value">
+                        <div class="health-bar">
+                            <div class="health-bar-fill" style="width: 100%"></div>
+                        </div>
+                        <span>100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Feed & Recent Access -->
+    <div class="dashboard-grid">
+        <!-- Activity Feed -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    📊 Recent Activity
+                </div>
+            </div>
+            <div id="activity-feed" style="max-height: 350px; overflow-y: auto;">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📊</div>
+                    <div>Loading activity feed...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Access -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    🔐 Recent Access Logs
+                </div>
+            </div>
+            <div id="access-logs" style="max-height: 350px; overflow-y: auto;">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🔐</div>
+                    <div>Loading access logs...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Update timestamp
+    function updateTimestamp() {
+        const now = new Date();
+        document.getElementById('live-timestamp').textContent =
+            now.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+    }
+
+    // Load all data
+    async function refreshData() {
+        try {
+            const [statsRes, visitorsRes, eventsRes] = await Promise.all([
+                fetch('/analytics/api/stats'),
+                fetch('/analytics/api/visitors'),
+                fetch('/analytics/api/security-events')
+            ]);
+
+            const stats = await statsRes.json();
+            const visitors = await visitorsRes.json();
+            const events = await eventsRes.json();
+
+            updateMetrics(stats.stats, visitors, events);
+            updateThreatsTable(events.events || []);
+            updateActivityFeed(visitors.visitors || [], events.events || []);
+            updateAccessLogs(visitors.visitors || []);
+
+        } catch (error) {
+            console.error('Failed to refresh data:', error);
+        }
+    }
+
+    function updateMetrics(stats, visitors, events) {
+        // Active sessions (unique IPs in last 5 minutes)
+        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const activeSessions = (visitors.visitors || []).filter(v =>
+            new Date(v.created_at) > fiveMinAgo
+        ).length;
+        document.getElementById('active-sessions').textContent = activeSessions;
+
+        // Threats
+        const threats = stats.security_events_last_24h || 0;
+        document.getElementById('threats-24h').textContent = threats;
+        const threatCard = document.getElementById('threat-card');
+        if (threats > 10) {
+            threatCard.classList.add('warning');
+        } else if (threats > 50) {
+            threatCard.classList.add('alert');
+        }
+
+        // Requests
+        document.getElementById('requests-24h').textContent = (stats.visits_last_24h || 0).toLocaleString();
+
+        // Failed auth (403 errors)
+        const failedAuth = (events.events || []).filter(e =>
+            e.description && e.description.includes('403')
+        ).length;
+        document.getElementById('failed-auth').textContent = failedAuth;
+
+        // Unique visitors
+        document.getElementById('unique-visitors').textContent = stats.unique_ips_last_24h || 0;
+    }
+
+    function updateThreatsTable(events) {
+        const highPriorityEvents = events
+            .filter(e => ['critical', 'high', 'error'].includes(e.severity))
+            .slice(0, 10);
+
+        const table = document.getElementById('threats-table');
+
+        if (highPriorityEvents.length === 0) {
+            table.innerHTML = `
+                <tr>
+                    <td colspan="5">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🛡️</div>
+                            <div>No active threats detected</div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        table.innerHTML = highPriorityEvents.map(e => `
+            <tr>
+                <td>${new Date(e.created_at).toLocaleTimeString()}</td>
+                <td>${e.event_type || 'Unknown'}</td>
+                <td>
+                    <span class="severity-badge severity-${e.severity || 'low'}">
+                        ${(e.severity || 'low').toUpperCase()}
+                    </span>
+                </td>
+                <td><span class="ip-badge">${e.ip_address || '-'}</span></td>
+                <td>
+                    <button class="action-btn danger" onclick="blockIP('${e.ip_address}')">
+                        Block IP
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function updateActivityFeed(visitors, events) {
+        const combined = [
+            ...visitors.slice(0, 15).map(v => ({
+                type: 'visit',
+                time: v.created_at,
+                title: `Visitor from ${v.ip_address}`,
+                meta: `${v.browser} • ${v.os} • ${v.path}`,
+                icon: '👤'
+            })),
+            ...events.slice(0, 5).map(e => ({
+                type: 'security',
+                time: e.created_at,
+                title: e.event_type,
+                meta: `${e.severity} • ${e.ip_address}`,
+                icon: e.severity === 'critical' ? '🚨' : '⚠️'
+            }))
+        ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 20);
+
+        document.getElementById('activity-feed').innerHTML = combined.map(item => `
+            <div class="activity-item">
+                <div class="activity-icon ${item.type === 'security' ? 'threat' : 'access'}">
+                    ${item.icon}
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">${item.title}</div>
+                    <div class="activity-meta">${item.meta}</div>
+                </div>
+                <div class="activity-time">${formatTimeAgo(item.time)}</div>
+            </div>
+        `).join('');
+    }
+
+    function updateAccessLogs(visitors) {
+        const logs = visitors.slice(0, 10);
+
+        document.getElementById('access-logs').innerHTML = logs.map(v => `
+            <div class="activity-item">
+                <div class="activity-icon access">
+                    ${v.is_mobile ? '📱' : '💻'}
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">
+                        <span class="ip-badge">${v.ip_address}</span>
+                    </div>
+                    <div class="activity-meta">
+                        ${v.method} ${v.path} • ${v.browser}
+                    </div>
+                </div>
+                <div class="activity-time">${formatTimeAgo(v.created_at)}</div>
+            </div>
+        `).join('');
+    }
+
+    function formatTimeAgo(dateString) {
+        const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
+
+        if (seconds < 60) return `${seconds}s ago`;
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+        return `${Math.floor(seconds / 86400)}d ago`;
+    }
+
+    function blockIP(ip) {
+        if (confirm(`Are you sure you want to block IP: ${ip}?`)) {
+            alert('IP blocking feature coming soon!\nThis will be implemented with rate limiting and firewall rules.');
+        }
+    }
+
+    // Initial load and auto-refresh
+    updateTimestamp();
+    refreshData();
+    setInterval(updateTimestamp, 1000);
+    setInterval(refreshData, 5000); // Refresh every 5 seconds
+
+    // Update page title with timestamp
+    setInterval(() => {
+        document.title = `SOC Dashboard (${new Date().toLocaleTimeString()})`;
+    }, 1000);
+</script>
+{% endblock %}

@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .analytics-header {
+        margin-bottom: 48px;
+    }
+
+    .analytics-title {
+        font-size: 36px;
+        font-family: 'Cormorant Garamond', serif;
+        color: #2D2926;
+        margin-bottom: 8px;
+    }
+
+    .analytics-subtitle {
+        color: #6B6560;
+        font-size: 16px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+        margin-bottom: 48px;
+    }
+
+    .stat-card {
+        background: #FFFFFF;
+        border: 1px solid #E8E4E1;
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        border-color: #C9A88F;
+        box-shadow: 0 8px 24px rgba(201, 168, 143, 0.15);
+    }
+
+    .stat-value {
+        font-size: 36px;
+        font-weight: 700;
+        color: #2D2926;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        color: #6B6560;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .stat-change {
+        font-size: 12px;
+        margin-top: 8px;
+    }
+
+    .stat-change.positive {
+        color: #4CAF50;
+    }
+
+    .stat-change.negative {
+        color: #F44336;
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #2D2926;
+        margin-bottom: 24px;
+    }
+
+    .data-table {
+        width: 100%;
+        background: #FFFFFF;
+        border: 1px solid #E8E4E1;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 48px;
+    }
+
+    .data-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .data-table th {
+        background: #F8F6F4;
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        color: #2D2926;
+        border-bottom: 1px solid #E8E4E1;
+    }
+
+    .data-table td {
+        padding: 16px;
+        border-bottom: 1px solid #F0EDE8;
+        color: #2D2926;
+    }
+
+    .data-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .data-table tr:hover {
+        background: #F8F6F4;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-success {
+        background: #E8F5E9;
+        color: #4CAF50;
+    }
+
+    .badge-warning {
+        background: #FFF3E0;
+        color: #FF9800;
+    }
+
+    .badge-danger {
+        background: #FFEBEE;
+        color: #F44336;
+    }
+
+    .badge-info {
+        background: #E3F2FD;
+        color: #2196F3;
+    }
+
+    .badge-bot {
+        background: #F3E5F5;
+        color: #9C27B0;
+    }
+
+    .chart-container {
+        background: #FFFFFF;
+        border: 1px solid #E8E4E1;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 48px;
+    }
+
+    .filter-bar {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 16px;
+        border: 1px solid #E8E4E1;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #2D2926;
+        background: #FFFFFF;
+    }
+
+    .security-alert {
+        background: #FFEBEE;
+        border-left: 4px solid #F44336;
+        padding: 16px 24px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+    }
+
+    .security-alert.warning {
+        background: #FFF3E0;
+        border-left-color: #FF9800;
+    }
+
+    .security-alert-title {
+        font-weight: 600;
+        color: #2D2926;
+        margin-bottom: 8px;
+    }
+
+    .security-alert-text {
+        color: #6B6560;
+        font-size: 14px;
+    }
+
+    .map-container {
+        width: 100%;
+        height: 400px;
+        background: #F8F6F4;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6B6560;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <div class="analytics-header">
+        <h1 class="analytics-title">Analytics & Monitoring Dashboard</h1>
+        <p class="analytics-subtitle">Real-time visitor tracking, security monitoring, and user behavior analytics</p>
+    </div>
+
+    <!-- Security Alerts -->
+    {% if security_alerts %}
+    {% for alert in security_alerts %}
+    <div class="security-alert {{ 'warning' if alert.severity == 'medium' else '' }}">
+        <div class="security-alert-title">🚨 Security Alert: {{ alert.event_type|title }}</div>
+        <div class="security-alert-text">{{ alert.description }} from IP: {{ alert.ip_address }} at {{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.total_visitors|default(0) }}</div>
+            <div class="stat-label">Total Visitors</div>
+            <div class="stat-change positive">+{{ stats.visitors_today|default(0) }} today</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.unique_visitors|default(0) }}</div>
+            <div class="stat-label">Unique Visitors</div>
+            <div class="stat-change">{{ stats.unique_today|default(0) }} today</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.page_views|default(0) }}</div>
+            <div class="stat-label">Page Views</div>
+            <div class="stat-change positive">+{{ stats.page_views_today|default(0) }} today</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.avg_session_duration|default('0m') }}</div>
+            <div class="stat-label">Avg. Session Duration</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.registered_users|default(0) }}</div>
+            <div class="stat-label">Registered Users</div>
+            <div class="stat-change positive">+{{ stats.new_users_today|default(0) }} today</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-value">{{ stats.security_events|default(0) }}</div>
+            <div class="stat-label">Security Events</div>
+            <div class="stat-change {{ 'negative' if stats.security_events_today > 0 else '' }}">{{ stats.security_events_today|default(0) }} today</div>
+        </div>
+    </div>
+
+    <!-- Recent Visitors -->
+    <div class="section-title">Recent Visitors</div>
+    <div class="data-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>IP Address</th>
+                    <th>Location</th>
+                    <th>Device</th>
+                    <th>Page</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for visitor in recent_visitors %}
+                <tr>
+                    <td>{{ visitor.created_at.strftime('%H:%M:%S') }}</td>
+                    <td>{{ visitor.ip_address }}</td>
+                    <td>{{ visitor.city }}, {{ visitor.country }}</td>
+                    <td>
+                        {% if visitor.is_bot %}
+                        <span class="badge badge-bot">Bot</span>
+                        {% else %}
+                        Mobile/Desktop
+                        {% endif %}
+                    </td>
+                    <td>{{ visitor.path }}</td>
+                    <td>
+                        {% if visitor.is_suspicious %}
+                        <span class="badge badge-danger">Suspicious</span>
+                        {% elif visitor.status_code >= 400 %}
+                        <span class="badge badge-warning">{{ visitor.status_code }}</span>
+                        {% else %}
+                        <span class="badge badge-success">{{ visitor.status_code }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Top Countries -->
+    <div class="section-title">Top Countries</div>
+    <div class="data-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Country</th>
+                    <th>Visitors</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for country in top_countries %}
+                <tr>
+                    <td>{{ country.country }}</td>
+                    <td>{{ country.count }}</td>
+                    <td>{{ "%.1f"|format(country.percentage) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recent Security Events -->
+    {% if recent_security_events %}
+    <div class="section-title">Recent Security Events</div>
+    <div class="data-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Event Type</th>
+                    <th>Severity</th>
+                    <th>IP Address</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in recent_security_events %}
+                <tr>
+                    <td>{{ event.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ event.event_type }}</td>
+                    <td>
+                        {% if event.severity == 'critical' %}
+                        <span class="badge badge-danger">Critical</span>
+                        {% elif event.severity == 'high' %}
+                        <span class="badge badge-danger">High</span>
+                        {% elif event.severity == 'medium' %}
+                        <span class="badge badge-warning">Medium</span>
+                        {% else %}
+                        <span class="badge badge-info">Low</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ event.ip_address }}</td>
+                    <td>{{ event.description }}</td>
+                    <td>{{ event.action_taken|default('Logged') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
