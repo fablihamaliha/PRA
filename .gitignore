@@ -4,68 +4,20 @@
 .env.docker
 .env.example
 
-# Public-facing files (keep private for security)
-# README.md
-SECURITY.md
-LICENSE
-CONTRIBUTING.md
-docker-compose.yml
+# Documentation - All markdown files ignored (internal use only)
+*.md
 
-# Sensitive Documentation (Internal Only)
-*_SETUP.md
-*_FEATURES.md
-*_GUIDE.md
-*_SUMMARY.md
-*_SUMMARY.txt
-*_COMPLETE.md
-*_CHECKLIST.txt
-*_QUICK*.txt
-*_QUICK*.md
-ANALYTICS_*.md
-SECURITY_*.md
-SECURITY_*.txt
-SOC_*.md
-HOW_TO_*.md
-LIVE_*.md
-MONITORING_*.md
-IMPLEMENTATION_*.md
-IMPROVEMENTS_*.md
-IMPROVEMENTS_*.txt
-CHANGES_*.md
-ADMIN_*.md
-ADMIN_*.txt
-AUTH_*.md
-BUILD_*.md
-CICD_*.md
-CLOUDFLARE_*.md
-CLOUDFLARE_*.txt
-gpt_*.md
-SECURITY.md
-ADD_SECOND_APP_TO_CLOUDFLARE.md
-DEPLOYMENT_*.md
-DEPLOY_*.md
-DEPLOY_*.txt
-DOCKER_*.md
-ERRORS_*.md
-GPT_*.md
-KUBERNETES_*.md
-MIGRATE_*.md
-QUICKSTART*.md
-RAPIDAPI_*.md
-ROUTINE_*.md
-SETUP_*.md
-SETUP_*.txt
-SHOPPING_*.md
-TROUBLESHOOTING_*.md
-VISUAL_*.md
-ARCHITECTURE_*.txt
-app_py_explanation.md
-file_connections_guide.md
+# Public-facing files (keep private for security)
+docker-compose.yml
+generate_admin_creds.py
+
+# Python helper scripts
 setup_*.py
 monitor_*.py
 check_*.py
 create_test_*.py
 test_*.py
+fix_*.py
 
 
 
@@ -123,7 +75,6 @@ env/
 htmlcov/
 .tox/
 .cache
-
 # Database
 instance/
 *.db
