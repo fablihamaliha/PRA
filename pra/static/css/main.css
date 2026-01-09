@@ -531,6 +531,8 @@ a:hover {
 }
 
 /* Responsive Design */
+
+/* Tablet (1024px and below) */
 @media (max-width: 1024px) {
     .container {
         padding: 0 24px;
@@ -547,59 +549,358 @@ a:hover {
     .routine-grid {
         gap: 24px;
     }
+
+    /* Better touch targets */
+    .btn, .btn-primary, .btn-secondary, .btn-outline {
+        min-height: 48px;
+        padding: 14px 32px;
+    }
+
+    .account-link {
+        min-height: 44px;
+        padding: 12px 24px;
+    }
 }
 
+/* Mobile (768px and below) */
 @media (max-width: 768px) {
+    /* Typography - Better readability on mobile */
     h1 {
         font-size: 36px;
+        letter-spacing: -0.8px;
     }
 
     h2 {
         font-size: 32px;
+        letter-spacing: -0.6px;
     }
 
     h3 {
         font-size: 24px;
+        letter-spacing: -0.4px;
     }
 
+    h4 {
+        font-size: 20px;
+    }
+
+    p {
+        font-size: 15px;
+        line-height: 1.7;
+    }
+
+    /* Section spacing for mobile */
     .section {
-        padding: 80px 0;
+        padding: 60px 0;
     }
 
     .section-title {
-        font-size: 36px;
+        font-size: 32px;
+        margin-bottom: 16px;
     }
 
+    .section-subtitle {
+        font-size: 16px;
+        margin-bottom: 40px;
+    }
+
+    /* Hide desktop navigation */
     .header-nav {
         display: none;
     }
 
+    /* Header adjustments */
+    .header-container {
+        height: 70px;
+    }
+
+    .header-logo a {
+        font-size: 22px;
+    }
+
+    /* Single column layouts on mobile */
     .grid-2, .grid-3, .grid-4 {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
 
     .routine-grid {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
 
     .routine-column {
         padding: 24px;
     }
+
+    .routine-label {
+        font-size: 28px;
+        margin-bottom: 24px;
+    }
+
+    /* Cards - Better spacing on mobile */
+    .card, .product-card {
+        padding: 20px;
+        border-radius: 14px;
+    }
+
+    /* Form elements - Larger touch targets */
+    .form-input, .form-select, .form-textarea {
+        padding: 14px 16px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        border-radius: 10px;
+    }
+
+    .form-label {
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+
+    /* Button improvements for mobile */
+    .btn, .btn-primary, .btn-secondary, .btn-outline {
+        min-height: 48px;
+        padding: 14px 28px;
+        font-size: 15px;
+        border-radius: 24px;
+        width: 100%; /* Full width on mobile */
+        max-width: 400px;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .header-actions .account-link {
+        width: auto; /* Keep header buttons inline */
+    }
+
+    /* Profile dropdown - Mobile optimization */
+    .profile-trigger {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+
+    .profile-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .profile-dropdown-menu {
+        min-width: 200px;
+        right: -10px;
+    }
+
+    /* Footer adjustments */
+    .footer {
+        padding: 50px 24px;
+    }
+
+    .footer-logo {
+        font-size: 22px;
+    }
+
+    .footer-text {
+        font-size: 13px;
+    }
 }
 
+/* Small Mobile (640px and below) */
 @media (max-width: 640px) {
+    /* Extra tight spacing for small screens */
     .container {
         padding: 0 16px;
     }
 
     .header-container {
         padding: 0 16px;
-        height: 70px;
+        height: 65px;
     }
 
+    /* Typography - Even more compact */
+    h1 {
+        font-size: 30px;
+        line-height: 1.15;
+    }
+
+    h2 {
+        font-size: 26px;
+    }
+
+    h3 {
+        font-size: 20px;
+    }
+
+    /* Section spacing - Very tight */
+    .section {
+        padding: 40px 0;
+    }
+
+    .section-title {
+        font-size: 26px;
+    }
+
+    .section-subtitle {
+        font-size: 15px;
+    }
+
+    /* Buttons - Slightly smaller but still tappable */
     .btn, .btn-primary, .btn-secondary, .btn-outline {
-        padding: 12px 24px;
+        padding: 13px 24px;
         font-size: 14px;
+        min-height: 46px;
+    }
+
+    /* Header actions - Compact */
+    .header-actions {
+        gap: 10px;
+    }
+
+    .account-link {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    /* Cards - Compact padding */
+    .card, .product-card {
+        padding: 16px;
+    }
+
+    .routine-column {
+        padding: 20px;
+    }
+
+    /* Product details */
+    .product-name {
+        font-size: 16px;
+    }
+
+    .product-reason {
+        font-size: 13px;
+    }
+
+    .product-price {
+        font-size: 18px;
+    }
+
+    /* Grid spacing */
+    .grid {
+        gap: 16px;
+    }
+
+    .routine-grid {
+        gap: 16px;
+    }
+
+    /* Profile dropdown - Very compact */
+    .profile-trigger {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+
+    .profile-trigger span:last-child {
+        display: none; /* Hide dropdown arrow on very small screens */
+    }
+
+    .profile-avatar {
+        width: 26px;
+        height: 26px;
+        font-size: 11px;
+    }
+
+    .dropdown-header {
+        padding: 12px;
+    }
+
+    .dropdown-user-name {
+        font-size: 14px;
+    }
+
+    .dropdown-user-email {
+        font-size: 12px;
+    }
+
+    .dropdown-item {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}
+
+/* Extra Small Mobile (480px and below) */
+@media (max-width: 480px) {
+    h1 {
+        font-size: 26px;
+    }
+
+    h2 {
+        font-size: 22px;
+    }
+
+    .header-logo a {
+        font-size: 20px;
+    }
+
+    .section {
+        padding: 32px 0;
+    }
+
+    .routine-label {
+        font-size: 24px;
+    }
+
+    /* Hide user name in header on very small screens */
+    .profile-trigger span:not(.profile-avatar):not(:last-child) {
+        display: none;
+    }
+
+    .header-actions .account-link:first-child {
+        display: none; /* Hide "Log In" button, keep only "Sign Up" */
+    }
+}
+
+/* Landscape orientation improvements */
+@media (max-width: 768px) and (orientation: landscape) {
+    .section {
+        padding: 40px 0;
+    }
+
+    .header-container {
+        height: 60px;
+    }
+
+    h1 {
+        font-size: 32px;
+    }
+
+    h2 {
+        font-size: 28px;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger tap targets for touch devices */
+    .nav-link, .account-link, .dropdown-item {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Remove hover effects on touch devices */
+    .card:hover, .product-card:hover {
+        transform: none;
+    }
+
+    .btn-primary:hover, .btn-secondary:hover {
+        transform: none;
+    }
+
+    /* Active states for better feedback */
+    .btn:active, .btn-primary:active {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+
+    .card:active, .product-card:active {
+        transform: scale(0.99);
     }
 }
 

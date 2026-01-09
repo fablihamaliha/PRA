@@ -715,8 +715,12 @@
             letter-spacing: -0.1px;
         }
 
-        /* Responsive */
+        /* Responsive - Tablet */
         @media (max-width: 968px) {
+            .hero {
+                margin: 60px auto 80px;
+            }
+
             .hero-title {
                 font-size: 44px;
                 letter-spacing: -1.2px;
@@ -731,6 +735,10 @@
             .hero-trust {
                 flex-wrap: wrap;
                 gap: 40px;
+            }
+
+            .section {
+                padding: 80px 40px;
             }
 
             .section-title {
@@ -774,11 +782,13 @@
             .btn-primary, .btn-secondary {
                 font-size: 15px;
                 padding: 16px 36px;
+                min-height: 48px;
             }
 
             .btn-cta {
                 font-size: 16px;
                 padding: 18px 44px;
+                min-height: 48px;
             }
 
             .header-nav {
@@ -787,6 +797,313 @@
 
             .steps-grid, .benefits-grid, .routine-preview {
                 grid-template-columns: 1fr;
+            }
+        }
+
+        /* Responsive - Mobile */
+        @media (max-width: 768px) {
+            .header-container {
+                padding: 0 20px;
+            }
+
+            .hero {
+                margin: 40px auto 60px;
+                padding: 0 20px;
+            }
+
+            .hero-badge {
+                font-size: 13px;
+                padding: 8px 20px;
+                margin-bottom: 24px;
+            }
+
+            .hero-title {
+                font-size: 36px;
+                margin-bottom: 20px;
+            }
+
+            .hero-subtitle {
+                font-size: 16px;
+                margin-bottom: 36px;
+            }
+
+            .hero-ctas {
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 60px;
+            }
+
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                max-width: 320px;
+                padding: 15px 32px;
+                font-size: 15px;
+            }
+
+            .hero-trust {
+                gap: 32px;
+                padding-top: 40px;
+            }
+
+            .trust-number {
+                font-size: 32px;
+            }
+
+            .trust-label {
+                font-size: 13px;
+            }
+
+            .section {
+                padding: 60px 20px;
+            }
+
+            .section-title {
+                font-size: 32px;
+                margin-bottom: 16px;
+            }
+
+            .section-subtitle {
+                font-size: 15px;
+                margin-bottom: 50px;
+            }
+
+            .steps-grid, .benefits-grid, .routine-preview {
+                gap: 24px;
+                margin-top: 40px;
+            }
+
+            .step-card {
+                padding: 36px 24px;
+            }
+
+            .step-number {
+                width: 56px;
+                height: 56px;
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+
+            .step-title {
+                font-size: 19px;
+                margin-bottom: 12px;
+            }
+
+            .step-description {
+                font-size: 14px;
+            }
+
+            .benefit-card {
+                padding: 32px 24px;
+            }
+
+            .benefit-icon {
+                font-size: 48px;
+                margin-bottom: 20px;
+            }
+
+            .benefit-title {
+                font-size: 17px;
+                margin-bottom: 12px;
+            }
+
+            .benefit-description {
+                font-size: 14px;
+            }
+
+            .routine-card {
+                padding: 32px 24px;
+            }
+
+            .routine-label {
+                font-size: 28px;
+                margin-bottom: 24px;
+            }
+
+            .routine-step {
+                margin-bottom: 20px;
+                padding-bottom: 20px;
+            }
+
+            .step-name {
+                font-size: 16px;
+                margin-bottom: 4px;
+            }
+
+            .step-reason {
+                font-size: 13px;
+            }
+
+            .final-cta {
+                padding: 80px 20px;
+            }
+
+            .cta-box {
+                padding: 50px 28px;
+                border-radius: 24px;
+            }
+
+            .cta-title {
+                font-size: 30px;
+                margin-bottom: 20px;
+            }
+
+            .cta-subtitle {
+                font-size: 15px;
+                margin-bottom: 36px;
+            }
+
+            .btn-cta {
+                font-size: 15px;
+                padding: 16px 40px;
+                width: 100%;
+                max-width: 280px;
+            }
+
+            .footer {
+                padding: 50px 20px;
+            }
+
+            .footer-logo {
+                font-size: 22px;
+            }
+
+            .footer-text {
+                font-size: 13px;
+            }
+
+            /* Orbs - Smaller on mobile */
+            .orb-1 {
+                width: 350px;
+                height: 350px;
+            }
+
+            .orb-2 {
+                width: 300px;
+                height: 300px;
+            }
+
+            .orb-3 {
+                width: 250px;
+                height: 250px;
+            }
+        }
+
+        /* Responsive - Small Mobile */
+        @media (max-width: 640px) {
+            .header-container {
+                padding: 0 16px;
+            }
+
+            .hero {
+                padding: 0 16px;
+                margin: 32px auto 48px;
+            }
+
+            .hero-title {
+                font-size: 30px;
+            }
+
+            .hero-subtitle {
+                font-size: 15px;
+            }
+
+            .hero-trust {
+                gap: 24px;
+                flex-direction: column;
+            }
+
+            .trust-item {
+                width: 100%;
+            }
+
+            .section {
+                padding: 48px 16px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+
+            .section-subtitle {
+                font-size: 14px;
+                margin-bottom: 40px;
+            }
+
+            .steps-grid, .benefits-grid, .routine-preview {
+                gap: 20px;
+            }
+
+            .step-card {
+                padding: 28px 20px;
+            }
+
+            .benefit-card {
+                padding: 28px 20px;
+            }
+
+            .routine-card {
+                padding: 28px 20px;
+            }
+
+            .cta-box {
+                padding: 40px 24px;
+            }
+
+            .cta-title {
+                font-size: 26px;
+            }
+
+            .cta-subtitle {
+                font-size: 14px;
+            }
+
+            .btn-cta {
+                padding: 14px 32px;
+                font-size: 14px;
+            }
+
+            .footer {
+                padding: 40px 16px;
+            }
+
+            /* Hide header actions except essential button on very small screens */
+            .header-actions .account-link:first-child {
+                display: none;
+            }
+
+            .account-link.signup {
+                padding: 8px 18px;
+                font-size: 13px;
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .btn-primary, .btn-secondary, .btn-cta {
+                min-height: 48px;
+            }
+
+            .step-card:hover,
+            .benefit-card:hover,
+            .routine-card:hover {
+                transform: none;
+            }
+
+            .step-card:active {
+                transform: scale(0.98);
+            }
+
+            .btn-primary:hover,
+            .btn-secondary:hover,
+            .btn-cta:hover {
+                transform: none;
+            }
+
+            .btn-primary:active,
+            .btn-secondary:active,
+            .btn-cta:active {
+                transform: scale(0.97);
+                opacity: 0.9;
             }
         }
 
