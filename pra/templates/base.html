@@ -241,6 +241,81 @@
 
         // Check session on page load
         checkUserSession();
+
+        function trackEvent(eventType, metadata = {}) {
+            try {
+                const payload = {
+                    event_type: eventType,
+                    metadata: metadata
+                };
+
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+                    navigator.sendBeacon('/analytics/api/track-event', blob);
+                } else {
+                    fetch('/analytics/api/track-event', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        keepalive: true
+                    });
+                }
+            } catch (error) {
+                console.error('Analytics tracking error:', error);
+            }
+        }
+
+        function safeText(value) {
+            if (!value) return '';
+            return value.toString().trim().slice(0, 120);
+        }
+
+        trackEvent('page_view', {
+            path: window.location.pathname,
+            title: document.title
+        });
+
+        const scrollMarks = new Set();
+        window.addEventListener('scroll', () => {
+            const scrollPercent = Math.round(
+                (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100
+            );
+            [25, 50, 75, 100].forEach(mark => {
+                if (scrollPercent >= mark && !scrollMarks.has(mark)) {
+                    scrollMarks.add(mark);
+                    trackEvent('scroll_depth', { percent: mark, path: window.location.pathname });
+                }
+            });
+        }, { passive: true });
+
+        document.addEventListener('click', (event) => {
+            const target = event.target.closest('button, a, input, select, textarea');
+            if (!target) return;
+
+            if (target.tagName === 'INPUT' && target.type === 'password') {
+                return;
+            }
+
+            trackEvent('click', {
+                tag: target.tagName,
+                id: target.id || '',
+                classes: safeText(target.className),
+                text: safeText(target.textContent),
+                href: target.getAttribute('href') || ''
+            });
+        });
+
+        document.addEventListener('submit', (event) => {
+            const form = event.target;
+            if (!form) return;
+
+            trackEvent('form_submit', {
+                id: form.id || '',
+                name: form.getAttribute('name') || '',
+                action: form.getAttribute('action') || window.location.pathname,
+                method: form.getAttribute('method') || 'GET'
+            });
+        });
     </script>
 
     <!-- Page-specific scripts -->

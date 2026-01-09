@@ -17,6 +17,9 @@ class VisitorLog(db.Model):
     path = db.Column(db.String(500), nullable=True)
     method = db.Column(db.String(10), nullable=True)
     referrer = db.Column(db.String(500), nullable=True)
+    city = db.Column(db.String(100), nullable=True)
+    region = db.Column(db.String(100), nullable=True)
+    country = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     user = db.relationship('User', back_populates='visitor_logs')
@@ -33,6 +36,9 @@ class VisitorLog(db.Model):
             'path': self.path,
             'method': self.method,
             'referrer': self.referrer,
+            'city': self.city,
+            'region': self.region,
+            'country': self.country,
             'created_at': self.created_at.isoformat()
         }
 

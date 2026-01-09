@@ -128,9 +128,9 @@
                 <tr>
                     <th>Time</th>
                     <th>IP</th>
+                    <th>Location</th>
                     <th>Path</th>
                     <th>Browser</th>
-                    <th>OS</th>
                 </tr>
             </thead>
             <tbody id="visitorsTable"></tbody>
@@ -152,39 +152,89 @@
             <tbody id="eventsTable"></tbody>
         </table>
     </div>
+
+    <div class="table-section">
+        <div class="table-title">Analytics Events</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Path</th>
+                    <th>Metadata</th>
+                </tr>
+            </thead>
+            <tbody id="analyticsEventsTable"></tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     async function loadAnalytics() {
-        const [visitorsRes, eventsRes] = await Promise.all([
+        const [visitorsRes, eventsRes, analyticsRes] = await Promise.all([
             fetch('/analytics/api/visitors'),
-            fetch('/analytics/api/security-events')
+            fetch('/analytics/api/security-events'),
+            fetch('/analytics/api/events')
         ]);
 
         const visitorsData = await visitorsRes.json();
         const eventsData = await eventsRes.json();
+        const analyticsData = await analyticsRes.json();
 
         const visitorsTable = document.getElementById('visitorsTable');
+        const maskIp = (ip) => {
+            if (!ip) return '-';
+            const parts = ip.split('.');
+            if (parts.length !== 4) return ip;
+            return `${parts[0]}.${parts[1]}.***.***`;
+        };
+
+        const normalizeIso = (isoString) => {
+            if (!isoString) return '';
+            if (isoString.includes('Z') || isoString.match(/[+-]\d{2}:\d{2}$/)) {
+                return isoString;
+            }
+            return `${isoString}Z`;
+        };
+
+        const formatTorontoTime = (isoString) => {
+            if (!isoString) return '-';
+            return new Date(normalizeIso(isoString)).toLocaleString('en-CA', {
+                timeZone: 'America/Toronto',
+                hour12: true
+            });
+        };
+
         visitorsTable.innerHTML = (visitorsData.visitors || []).slice(0, 20).map(v => `
             <tr>
-                <td>${new Date(v.created_at).toLocaleString()}</td>
-                <td>${v.ip_address || '-'}</td>
+                <td>${formatTorontoTime(v.created_at)}</td>
+                <td>${maskIp(v.ip_address)}</td>
+                <td>${[v.city, v.region, v.country].filter(Boolean).join(', ') || '-'}</td>
                 <td>${v.path || '-'}</td>
                 <td>${v.browser || '-'}</td>
-                <td>${v.os || '-'}</td>
             </tr>
         `).join('');
 
         const eventsTable = document.getElementById('eventsTable');
         eventsTable.innerHTML = (eventsData.events || []).slice(0, 20).map(e => `
             <tr>
-                <td>${new Date(e.created_at).toLocaleString()}</td>
+                <td>${formatTorontoTime(e.created_at)}</td>
                 <td>${e.event_type}</td>
                 <td>${e.severity}</td>
                 <td>${e.path || '-'}</td>
                 <td>${e.ip_address || '-'}</td>
+            </tr>
+        `).join('');
+
+        const analyticsTable = document.getElementById('analyticsEventsTable');
+        analyticsTable.innerHTML = (analyticsData.events || []).slice(0, 20).map(e => `
+            <tr>
+                <td>${formatTorontoTime(e.created_at)}</td>
+                <td>${e.event_type}</td>
+                <td>${e.path || '-'}</td>
+                <td>${e.metadata || '-'}</td>
             </tr>
         `).join('');
     }

@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timedelta
 
 from flask import Blueprint, jsonify, render_template, request
@@ -11,8 +12,22 @@ from pra.models.db import db
 analytics_bp = Blueprint('analytics', __name__, url_prefix='/analytics')
 
 
+def _get_client_ip():
+    return request.headers.get('X-Forwarded-For', request.remote_addr)
+
+
+def _is_ip_allowed(ip_address):
+    allowlist = (os.getenv('ADMIN_IP_ALLOWLIST', '') or '').strip()
+    if not allowlist:
+        return True
+    allowed = {ip.strip() for ip in allowlist.split(',') if ip.strip()}
+    return ip_address in allowed
+
+
 def _admin_required():
-    return current_user.is_authenticated and current_user.email.endswith('@admin.com')
+    if not (current_user.is_authenticated and current_user.email.endswith('@admin.com')):
+        return False
+    return _is_ip_allowed(_get_client_ip())
 
 
 @analytics_bp.route('/dashboard')
@@ -82,6 +97,19 @@ def track_event():
     db.session.commit()
 
     return jsonify({'success': True}), 200
+
+
+@analytics_bp.route('/api/events')
+@login_required
+def get_events():
+    if not _admin_required():
+        return jsonify({'error': 'Admin access required'}), 403
+
+    events = AnalyticsEvent.query.order_by(AnalyticsEvent.created_at.desc()).limit(200).all()
+    return jsonify({
+        'success': True,
+        'events': [e.to_dict() for e in events]
+    }), 200
 
 
 def _get_stats_payload():
