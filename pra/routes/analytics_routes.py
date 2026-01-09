@@ -2,8 +2,8 @@ import json
 import os
 from datetime import datetime, timedelta
 
-from flask import Blueprint, jsonify, render_template, request
-from flask_login import current_user, login_required
+from flask import Blueprint, jsonify, render_template, request, session, redirect, url_for
+from flask_login import current_user
 
 from pra.models.analytics import VisitorLog, SecurityEvent, AnalyticsEvent
 from pra.models.db import db
@@ -12,39 +12,31 @@ from pra.models.db import db
 analytics_bp = Blueprint('analytics', __name__, url_prefix='/analytics')
 
 
-def _get_client_ip():
-    return request.headers.get('X-Forwarded-For', request.remote_addr)
-
-
-def _is_ip_allowed(ip_address):
-    allowlist = (os.getenv('ADMIN_IP_ALLOWLIST', '') or '').strip()
-    if not allowlist:
-        return True
-    allowed = {ip.strip() for ip in allowlist.split(',') if ip.strip()}
-    return ip_address in allowed
+def _is_admin_authenticated():
+    """Check if current session is admin authenticated"""
+    return session.get('admin_authenticated', False) and session.get('admin_username')
 
 
 def _admin_required():
-    if not (current_user.is_authenticated and current_user.email.endswith('@admin.com')):
-        return False
-    return _is_ip_allowed(_get_client_ip())
+    """Check if user is authenticated as admin"""
+    return _is_admin_authenticated()
 
 
 @analytics_bp.route('/dashboard')
-@login_required
 def dashboard():
+    """Analytics dashboard - requires admin authentication"""
     if not _admin_required():
-        return jsonify({'error': 'Admin access required'}), 403
+        return redirect(url_for('admin_auth.login_page'))
 
     stats = _get_stats_payload()
     return render_template('analytics_dashboard.html', stats=stats)
 
 
 @analytics_bp.route('/api/visitors')
-@login_required
 def get_visitors():
+    """Get visitor logs - requires admin authentication"""
     if not _admin_required():
-        return jsonify({'error': 'Admin access required'}), 403
+        return jsonify({'error': 'Admin authentication required'}), 403
 
     visitors = VisitorLog.query.order_by(VisitorLog.created_at.desc()).limit(200).all()
     return jsonify({
@@ -54,10 +46,10 @@ def get_visitors():
 
 
 @analytics_bp.route('/api/security-events')
-@login_required
 def get_security_events():
+    """Get security events - requires admin authentication"""
     if not _admin_required():
-        return jsonify({'error': 'Admin access required'}), 403
+        return jsonify({'error': 'Admin authentication required'}), 403
 
     events = SecurityEvent.query.order_by(SecurityEvent.created_at.desc()).limit(200).all()
     return jsonify({
@@ -67,10 +59,10 @@ def get_security_events():
 
 
 @analytics_bp.route('/api/stats')
-@login_required
 def get_stats():
+    """Get analytics stats - requires admin authentication"""
     if not _admin_required():
-        return jsonify({'error': 'Admin access required'}), 403
+        return jsonify({'error': 'Admin authentication required'}), 403
 
     return jsonify({
         'success': True,
@@ -100,10 +92,10 @@ def track_event():
 
 
 @analytics_bp.route('/api/events')
-@login_required
 def get_events():
+    """Get analytics events - requires admin authentication"""
     if not _admin_required():
-        return jsonify({'error': 'Admin access required'}), 403
+        return jsonify({'error': 'Admin authentication required'}), 403
 
     events = AnalyticsEvent.query.order_by(AnalyticsEvent.created_at.desc()).limit(200).all()
     return jsonify({

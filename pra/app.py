@@ -64,6 +64,14 @@ def create_app(config_class=Config):
     app.register_blueprint(community_bp, url_prefix='/community')
     app.register_blueprint(routine_builder_bp)
 
+    # Register admin authentication blueprint
+    try:
+        from pra.routes.admin_auth import admin_auth_bp
+        app.register_blueprint(admin_auth_bp)
+        logger.info("Admin authentication routes registered successfully")
+    except ImportError:
+        logger.warning("Admin authentication routes not available")
+
     # Optional: Register analytics blueprint if available (may be excluded for security)
     try:
         from pra.routes.analytics_routes import analytics_bp
@@ -84,7 +92,7 @@ def create_app(config_class=Config):
     with app.app_context():
         try:
             # Import models here to ensure they're registered
-            from pra.models import user, skin_profile, product, recommendation, routine, community, analytics
+            from pra.models import user, skin_profile, product, recommendation, routine, community, analytics, admin_user
             db.create_all()
             logger.info("Database tables created successfully")
 
