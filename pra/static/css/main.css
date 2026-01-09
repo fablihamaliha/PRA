@@ -851,8 +851,10 @@ a:hover {
         display: none;
     }
 
-    .header-actions .account-link:first-child {
-        display: none; /* Hide "Log In" button, keep only "Sign Up" */
+    /* Keep both login and signup buttons visible on mobile */
+    .header-actions .account-link {
+        padding: 6px 14px;
+        font-size: 12px;
     }
 }
 
