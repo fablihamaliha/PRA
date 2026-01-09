@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Generate secure admin credentials for analytics dashboard access
 Run this script to create username and Argon2-hashed passphrase

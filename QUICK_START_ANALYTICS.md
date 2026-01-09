@@ -18,9 +18,12 @@
 ### Step 1: Generate Admin Credentials
 
 ```bash
-# Run locally (NOT on Pi):
+# Install argon2-cffi locally first:
+pip3 install argon2-cffi
+
+# Run generator locally (NOT on Pi):
 cd /Users/maliha/Desktop/PRA
-python generate_admin_creds.py
+python3 generate_admin_creds.py
 
 # Follow prompts:
 # - Enter username (or use random)
