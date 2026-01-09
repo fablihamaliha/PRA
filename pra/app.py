@@ -57,17 +57,28 @@ def create_app(config_class=Config):
     from pra.blueprints.skincare import skincare_bp
     from pra.blueprints.deals import deals_bp
     from pra.blueprints.community import community_bp
-    from pra.routes.analytics_routes import analytics_bp
 
     # Register blueprints
     app.register_blueprint(skincare_bp, url_prefix='/skincare')
     app.register_blueprint(deals_bp, url_prefix='/deals')
     app.register_blueprint(community_bp, url_prefix='/community')
     app.register_blueprint(routine_builder_bp)
-    app.register_blueprint(analytics_bp)
 
-    from pra.middleware.analytics_middleware import AnalyticsMiddleware
-    AnalyticsMiddleware(app)
+    # Optional: Register analytics blueprint if available (may be excluded for security)
+    try:
+        from pra.routes.analytics_routes import analytics_bp
+        app.register_blueprint(analytics_bp)
+        logger.info("Analytics routes registered successfully")
+    except ImportError:
+        logger.warning("Analytics routes not available (excluded from repository for security)")
+
+    # Optional: Initialize analytics middleware if available
+    try:
+        from pra.middleware.analytics_middleware import AnalyticsMiddleware
+        AnalyticsMiddleware(app)
+        logger.info("Analytics middleware initialized successfully")
+    except ImportError:
+        logger.warning("Analytics middleware not available")
 
     # Create tables
     with app.app_context():
@@ -100,7 +111,11 @@ def create_app(config_class=Config):
         # If user is logged in, redirect to dashboard
         if current_user.is_authenticated:
             if current_user.email.endswith('@admin.com'):
-                return redirect(url_for('analytics.dashboard'))
+                # Try to redirect to analytics, fallback to regular dashboard if not available
+                try:
+                    return redirect(url_for('analytics.dashboard'))
+                except:
+                    return redirect(url_for('dashboard'))
             return redirect(url_for('dashboard'))
         return render_template('index.html')
 
