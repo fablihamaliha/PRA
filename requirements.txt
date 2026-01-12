@@ -14,6 +14,7 @@ openai==1.54.0
 # Environment variable management
 python-dotenv==1.0.0
 python-json-logger
+psycopg[binary]
 
 # Database
 SQLAlchemy==2.0.23
