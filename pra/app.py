@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import os
 import re
 from pra.blueprints.routine_builder import routine_builder_bp
+from pra.telemetry_middleware import setup_telemetry
 
 # Load environment variables from .env file
 load_dotenv()
@@ -38,6 +39,17 @@ def create_app(config_class=Config):
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     logger = logging.getLogger(__name__)
+
+    # Persist logs to file so Promtail can ingest them.
+    logs_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'logs'))
+    os.makedirs(logs_dir, exist_ok=True)
+    log_path = os.path.join(logs_dir, 'app.log')
+    root_logger = logging.getLogger()
+    if not any(getattr(h, 'baseFilename', None) == log_path for h in root_logger.handlers):
+        file_handler = logging.FileHandler(log_path)
+        file_handler.setLevel(app.config['LOG_LEVEL'])
+        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        root_logger.addHandler(file_handler)
 
     # Initialize database connects db object to flask app 
     db.init_app(app)
@@ -675,6 +687,9 @@ def create_app(config_class=Config):
     @app.errorhandler(500)
     def internal_error(e):
         return jsonify({'error': 'Internal server error', 'message': str(e)}), 500
+
+    # Add telemetry (metrics and logging)
+    setup_telemetry(app, app_name='skincares')
 
     return app
 

@@ -1,0 +1,225 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║               🌐 DOMAIN UPDATE: skincares.work                            ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+Date: 2026-01-08
+Status: ✅ READY TO DEPLOY
+
+───────────────────────────────────────────────────────────────────────────
+✅ FILES UPDATED
+───────────────────────────────────────────────────────────────────────────
+
+1. pra/services/notification_service.py (Line 145)
+   Changed: http://localhost:5001/analytics/dashboard
+   To:      https://skincares.work/analytics/dashboard
+   
+   Purpose: Email alerts now link to your custom domain
+
+2. README.md (Multiple locations)
+   Changed: https://tyisha-unoppressed-luvenia.ngrok-free.dev
+   To:      https://skincares.work
+   
+   Changed: Infrastructure section
+   - Added: Cloudflare - Custom domain, CDN, DDoS protection, SSL/TLS
+   - Added: Cloudflare Tunnel - Secure public HTTPS access
+   - Replaced: ngrok references with Cloudflare
+   
+   Purpose: Public-facing documentation now reflects custom domain
+
+───────────────────────────────────────────────────────────────────────────
+📄 NEW FILES CREATED
+───────────────────────────────────────────────────────────────────────────
+
+1. CLOUDFLARE_SETUP_GUIDE.md
+   - Complete step-by-step Cloudflare Tunnel setup
+   - Configuration examples
+   - Security best practices
+   - Troubleshooting guide
+   - DNS configuration instructions
+
+2. MIGRATE_TO_CLOUDFLARE.md
+   - Quick 15-minute migration guide from ngrok
+   - Essential commands only
+   - Fast setup for experienced users
+
+3. DOMAIN_UPDATE_SUMMARY.txt (this file)
+   - Summary of all changes
+
+───────────────────────────────────────────────────────────────────────────
+🚀 NEXT STEPS TO GO LIVE
+───────────────────────────────────────────────────────────────────────────
+
+Follow the migration guide (takes ~15 minutes):
+
+[ ] Step 1: Install cloudflared on Raspberry Pi
+    Command: wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64
+
+[ ] Step 2: Authenticate with Cloudflare
+    Command: cloudflared tunnel login
+
+[ ] Step 3: Create tunnel
+    Command: cloudflared tunnel create pra-tunnel
+
+[ ] Step 4: Configure tunnel
+    File: ~/.cloudflared/config.yml
+
+[ ] Step 5: Set up DNS
+    Command: cloudflared tunnel route dns pra-tunnel skincares.work
+
+[ ] Step 6: Test tunnel
+    Command: cloudflared tunnel run pra-tunnel
+    Test: https://skincares.work
+
+[ ] Step 7: Install as systemd service
+    File: /etc/systemd/system/cloudflared.service
+
+[ ] Step 8: Start service
+    Commands:
+    - sudo systemctl daemon-reload
+    - sudo systemctl enable cloudflared
+    - sudo systemctl start cloudflared
+
+[ ] Step 9: Verify live site
+    URLs to test:
+    - https://skincares.work
+    - https://www.skincares.work
+    - https://skincares.work/analytics/dashboard
+
+[ ] Step 10: Stop ngrok (after Cloudflare works)
+    Commands:
+    - sudo systemctl stop ngrok
+    - sudo systemctl disable ngrok
+
+[ ] Step 11: Rebuild and restart PRA app
+    Commands:
+    - docker restart pra-app
+    - docker logs pra-app
+
+[ ] Step 12: Configure Cloudflare Dashboard
+    - SSL/TLS → Full (strict)
+    - Always Use HTTPS → ON
+    - Auto Minify → ON
+
+───────────────────────────────────────────────────────────────────────────
+🆚 BEFORE vs AFTER
+───────────────────────────────────────────────────────────────────────────
+
+BEFORE (ngrok):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+URL:              https://tyisha-unoppressed-luvenia.ngrok-free.dev
+Custom Domain:    ❌ No (paid $8/mo)
+SSL:              ✅ Auto
+CDN:              ❌ No
+DDoS Protection:  ⚠️  Limited
+Session Timeout:  ⚠️  Yes (reconnects)
+Monthly Cost:     $0-20
+Professional:     ⚠️  Free tier URL not professional
+
+AFTER (Cloudflare):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+URL:              https://skincares.work
+Custom Domain:    ✅ Yes (free)
+SSL:              ✅ Auto (Cloudflare certificate)
+CDN:              ✅ Global CDN (faster worldwide)
+DDoS Protection:  ✅ Enterprise-grade
+Session Timeout:  ✅ No timeout
+Monthly Cost:     $0
+Professional:     ✅ Custom domain, very professional
+
+───────────────────────────────────────────────────────────────────────────
+🎯 BENEFITS OF CLOUDFLARE
+───────────────────────────────────────────────────────────────────────────
+
+Performance:
+✅ Global CDN (200+ cities worldwide)
+✅ Automatic caching
+✅ Image optimization
+✅ Minification (JS, CSS, HTML)
+✅ Brotli compression
+✅ HTTP/3 support
+
+Security:
+✅ Free SSL/TLS certificates
+✅ DDoS protection (unlimited)
+✅ Web Application Firewall (WAF)
+✅ Rate limiting
+✅ Bot protection
+✅ Always-on HTTPS
+
+Reliability:
+✅ 100% uptime SLA
+✅ No session timeouts
+✅ Automatic failover
+✅ Load balancing
+
+Cost:
+✅ 100% FREE for your use case
+✅ No hidden fees
+✅ Unlimited bandwidth
+
+Professionalism:
+✅ Custom domain (skincares.work)
+✅ Professional branding
+✅ Better for SEO
+✅ Portfolio-ready
+
+───────────────────────────────────────────────────────────────────────────
+📊 MONITORING UPDATES
+───────────────────────────────────────────────────────────────────────────
+
+After Cloudflare is live, you can also expose monitoring:
+
+Optional Subdomains:
+- monitoring.skincares.work → Grafana dashboard
+- api.skincares.work → API endpoints
+- admin.skincares.work → Admin dashboard
+
+To add these:
+1. Edit ~/.cloudflared/config.yml
+2. Add subdomain entries
+3. Route DNS: cloudflared tunnel route dns pra-tunnel monitoring.skincares.work
+4. Restart: sudo systemctl restart cloudflared
+
+───────────────────────────────────────────────────────────────────────────
+🔒 SECURITY NOTES
+───────────────────────────────────────────────────────────────────────────
+
+Important:
+✅ .gitignore already prevents CLOUDFLARE_SETUP_GUIDE.md from being committed
+✅ Email notification URLs updated to use https://skincares.work
+✅ README updated with custom domain
+✅ All sensitive config in .gitignore
+
+No Action Needed:
+- Your .env files are already protected
+- Cloudflare tunnel credentials stored locally only
+- No secrets in code
+
+───────────────────────────────────────────────────────────────────────────
+📚 DOCUMENTATION
+───────────────────────────────────────────────────────────────────────────
+
+Quick Start:
+→ MIGRATE_TO_CLOUDFLARE.md (15 minutes)
+
+Complete Guide:
+→ CLOUDFLARE_SETUP_GUIDE.md (detailed)
+
+Troubleshooting:
+→ See "Troubleshooting" section in CLOUDFLARE_SETUP_GUIDE.md
+
+───────────────────────────────────────────────────────────────────────────
+✅ READY TO DEPLOY
+───────────────────────────────────────────────────────────────────────────
+
+Your application code is ready. Follow MIGRATE_TO_CLOUDFLARE.md to:
+1. Set up Cloudflare Tunnel (15 min)
+2. Go live at https://skincares.work
+3. Stop ngrok and save money
+
+After deployment, your app will be accessible at:
+🌐 https://skincares.work
+
+═══════════════════════════════════════════════════════════════════════════
+END OF SUMMARY
+═══════════════════════════════════════════════════════════════════════════
