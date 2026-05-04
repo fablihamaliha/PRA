@@ -11,6 +11,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # jjj
     # ports:
     #   - "5432:5432"  # Commented out - not needed, DB is internal to Docker
     healthcheck:
