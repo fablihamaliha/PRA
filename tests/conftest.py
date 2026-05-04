@@ -1,4 +1,9 @@
+import os
 import pytest
+
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+os.environ["SECRET_KEY"] = "test-secret-key"
+
 from pra.app import create_app
 from pra.models.db import db
 from pra.config import TestConfig
